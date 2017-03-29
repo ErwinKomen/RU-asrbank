@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "asrbank", "asrbank\asrbank.pyproj", "{8CF7DD5E-A914-42F2-94E2-C4FDF98D9DFA}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "asrfix", "asrfix\asrfix.pyproj", "{0A8A4A3A-BEE3-46CF-9C2C-190BCDF648E3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8CF7DD5E-A914-42F2-94E2-C4FDF98D9DFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CF7DD5E-A914-42F2-94E2-C4FDF98D9DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CF7DD5E-A914-42F2-94E2-C4FDF98D9DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CF7DD5E-A914-42F2-94E2-C4FDF98D9DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A8A4A3A-BEE3-46CF-9C2C-190BCDF648E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A8A4A3A-BEE3-46CF-9C2C-190BCDF648E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

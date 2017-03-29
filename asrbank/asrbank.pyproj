@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <Name>asrbank</Name>
+    <RootNamespace>asrbank</RootNamespace>
+    <InterpreterId>{5966ffed-512e-46a6-959b-7a014daf5ec2}</InterpreterId>
+    <InterpreterVersion>3.5</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>8cf7dd5e-a914-42f2-94e2-c4fdf98d9dfa</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <ProjectTypeGuids>{5F0BE9CA-D677-4A4D-8806-6076C0FAAD37};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <StartupFile>manage.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <LaunchProvider>Django launcher</LaunchProvider>
+    <OutputPath>.</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="asrbank\transcription\admin.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="asrbank\transcription\forms.py" />
+    <Compile Include="asrbank\transcription\models.py" />
+    <Compile Include="asrbank\transcription\tests.py" />
+    <Compile Include="asrbank\transcription\views.py" />
+    <Compile Include="asrbank\transcription\__init__.py" />
+    <Compile Include="asrbank\transcription\migrations\__init__.py" />
+    <Compile Include="manage.py" />
+    <Compile Include="asrbank\__init__.py" />
+    <Compile Include="asrbank\settings.py" />
+    <Compile Include="asrbank\urls.py" />
+    <Compile Include="asrbank\wsgi.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="asrbank\templates\" />
+    <Folder Include="asrbank\templates\admin\" />
+    <Folder Include="asrbank\transcription\" />
+    <Folder Include="asrbank\transcription\migrations\" />
+    <Folder Include="asrbank\transcription\static\" />
+    <Folder Include="asrbank\transcription\static\transcription\" />
+    <Folder Include="asrbank\transcription\static\transcription\content\" />
+    <Folder Include="asrbank\transcription\static\transcription\fonts\" />
+    <Folder Include="asrbank\transcription\static\transcription\scripts\" />
+    <Folder Include="asrbank\transcription\templates\" />
+    <Folder Include="asrbank\transcription\templates\transcription\" />
+    <Folder Include="asrbank\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="asrbank\templates\admin\base.html" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\asrbank.js" />
+    <Content Include="asrbank\transcription\templates\transcription\overview.html" />
+    <Content Include="asrbank\transcription\templates\transcription\topnav.html" />
+    <Content Include="requirements.txt" />
+    <Content Include="asrbank\transcription\static\transcription\content\bootstrap.css" />
+    <Content Include="asrbank\transcription\static\transcription\content\bootstrap.min.css" />
+    <Content Include="asrbank\transcription\static\transcription\content\site.css" />
+    <Content Include="asrbank\transcription\static\transcription\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="asrbank\transcription\static\transcription\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="asrbank\transcription\static\transcription\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="asrbank\transcription\static\transcription\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\bootstrap.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\bootstrap.min.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery-1.10.2.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery-1.10.2.min.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery-1.10.2.min.map" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery.validate-vsdoc.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery.validate.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery.validate.min.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\modernizr-2.6.2.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\respond.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\respond.min.js" />
+    <Content Include="asrbank\transcription\static\transcription\scripts\_references.js" />
+    <Content Include="asrbank\transcription\templates\transcription\about.html" />
+    <Content Include="asrbank\transcription\templates\transcription\contact.html" />
+    <Content Include="asrbank\transcription\templates\transcription\index.html" />
+    <Content Include="asrbank\transcription\templates\transcription\layout.html" />
+    <Content Include="asrbank\transcription\templates\transcription\login.html" />
+    <Content Include="asrbank\transcription\templates\transcription\loginpartial.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.mht">
+      <SubType>WebBrowser</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\..\..\..\..\env\asrbank\">
+      <Id>{5966ffed-512e-46a6-959b-7a014daf5ec2}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>asrbank (Python 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
+  <!-- Specify pre- and post-build commands in the BeforeBuild and 
+       AfterBuild targets below. -->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <AutoAssignPort>True</AutoAssignPort>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

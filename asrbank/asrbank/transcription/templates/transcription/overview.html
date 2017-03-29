@@ -1,0 +1,39 @@
+﻿{% extends "transcription/layout.html" %}
+
+{% block content %}
+    {% if overview_list %}
+      <h3>Available descriptors</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            {% for hd in order_heads %}
+            <th class="sortable" scope="col">
+              <div class="text">
+                {% if hd.order == "" %}{{hd.name}}
+                {% else %}
+                <a href=?{{hd.order}}>{{hd.name}}</a>
+                {% endif %}
+              </div>
+            </th>
+            {% endfor %}
+          </tr>
+          <tr>
+          </tr>
+        </thead>
+        <tbody>
+        {% for descriptor in overview_list %}
+          <tr>
+            <td>{{descriptor.id}}</td>
+            <td><a href="/{{app_prefix }}admin/collection/collection/{{coll.pk}}/change/">{{descriptor.identifier}}</a></td>
+            <td>{{descriptor.description}}
+              <span class="coll-xml"><a class="btn btn-success btn-xs" href="/{{app_prefix }}output/{{descriptor.pk}}?submit_type=xml">xml</a></span>
+              <span class="coll-xml"><a class="btn btn-error btn-xs" href="/{{app_prefix }}transcription/{{descriptor.pk}}?submit_type=">edit</a></span>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No descriptors are available.</p>
+    {% endif %}
+{% endblock %}

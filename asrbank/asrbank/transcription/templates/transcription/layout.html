@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'transcription/content/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'transcription/content/site.css' %}" />
+    <script src="{% static 'transcription/scripts/modernizr-2.6.2.js' %}"></script>
+    <script src="{% static 'transcription/scripts/jquery-1.10.2.js' %}"></script>
+    <script src="{% static 'transcription/scripts/bootstrap.js' %}"></script>
+    <script src="{% static 'transcription/scripts/respond.js' %}"></script>
+    <script src="{% static 'transcription/scripts/asrbank.js' %}"></script>
+</head>
+
+<body>
+    {% include 'transcription/topnav.html' %}
+
+    <div class="container body-content">
+{% block content %}{% endblock %}
+        <hr/>
+        <footer>
+            <p>&copy; {{ year }} - OH metadata registry</p>
+        </footer>
+    </div>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
