@@ -12,6 +12,9 @@
     <OutputPath>.</OutputPath>
     <Name>asrfix</Name>
     <RootNamespace>asrfix</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>-i "d:/data files/tg/oralhistory/oh-fixtures.txt" -o "d:/data files/tg/oralhistory/oh-fixtures.json"</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

@@ -220,6 +220,7 @@ class Availability(models.Model):
         sBack = "[{}] {}".format(idt,choice_english(AVAILABILITY, self.name))
         return sBack
 
+
 class Participant(models.Model):
     """A participant of an interview"""
     
@@ -264,25 +265,6 @@ class Interviewer(Participant):
         return sBack
 
 
-class SpatialCoverage(models.Model):
-    """Spatial coverage of a transcription"""
-
-    class Meta:
-        verbose_name_plural = "Spatial coverages"
-
-    # == country (0-1;c) (name+ISO-3166 code)
-    country = models.CharField("Country included in this spatial coverage", choices=build_choice_list(COVERAGE_SPATIAL_COUNTRY), max_length=5, help_text=get_help(COVERAGE_SPATIAL_COUNTRY), default='0')
-    # [0-1] place
-    place = models.CharField("Place (city) for this spatial coverage", max_length=80, help_text=get_help(COVERAGE_SPATIAL_PLACE), blank=True)
-    # [1]     Each descriptor can have [0-n] spatial coverages associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="spatialcoverages")
-
-    def __str__(self):
-        idt = self.descriptor.identifier
-        sBack = "[{}] {}".format(idt,choice_english(COVERAGE_SPATIAL_COUNTRY, self.country))
-        return sBack
-
-
 class TemporalCoverage(models.Model):
     """Temporal coverage of a transcription"""
 
@@ -299,6 +281,25 @@ class TemporalCoverage(models.Model):
     def __str__(self):
         idt = self.descriptor.identifier
         sBack = "[{}] {}-{}".format(idt,self.startYear, self.endYear)
+        return sBack
+
+
+class SpatialCoverage(models.Model):
+    """Spatial coverage of a transcription"""
+
+    class Meta:
+        verbose_name_plural = "Spatial coverages"
+
+    # == country (0-1;c) (name+ISO-3166 code)
+    country = models.CharField("Country included in this spatial coverage", choices=build_choice_list(COVERAGE_SPATIAL_COUNTRY), max_length=5, help_text=get_help(COVERAGE_SPATIAL_COUNTRY), default='0')
+    # [0-1] place
+    place = models.CharField("Place (city) for this spatial coverage", max_length=80, help_text=get_help(COVERAGE_SPATIAL_PLACE), blank=True)
+    # [1]     Each descriptor can have [0-n] spatial coverages associated with it
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="spatialcoverages")
+
+    def __str__(self):
+        idt = self.descriptor.identifier
+        sBack = "[{}] {}".format(idt,choice_english(COVERAGE_SPATIAL_COUNTRY, self.country))
         return sBack
 
 

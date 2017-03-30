@@ -1,25 +1,23 @@
 from django.contrib import admin
-import nested_admin
-from django.db.models import Q
-from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.core import serializers
 from django.core.urlresolvers import resolve
+from django.db.models import Q
 from django.forms import Textarea
 from django.shortcuts import redirect
-from asrbank.transcription.models import *
-from asrbank.settings import APP_PREFIX
+from django import forms
 from functools import partial
-from django.core import serializers
-from django.contrib.contenttypes.models import ContentType
+
 import copy  # (1) use python copy
+import nested_admin
 import logging
+
+from asrbank.transcription.models import *
+from asrbank.transcription.forms import *
+from asrbank.settings import APP_PREFIX
 
 MAX_IDENTIFIER_LEN = 10
 logger = logging.getLogger(__name__)
-
-def init_choices(obj, sFieldName, sSet):
-    if (obj.fields != None and sFieldName in obj.fields):
-        obj.fields[sFieldName].choices = build_choice_list(sSet)
-        obj.fields[sFieldName].help_text = get_help(sSet)
 
 def get_formfield_qs(modelThis, instanceThis, parentName, bNoEmpty = False):
     """Get the queryset for [modelThis]
@@ -106,21 +104,123 @@ def copy_item(request=None):
     return redirect(sCurrent)
 
 
+class LanguageInline(nested_admin.NestedTabularInline):
+    model = Language
+    form = LanguageAdminForm
+    verbose_name = "Transcription language"
+    verbose_name_plural = "Transcription language"
+    # Define scope: [1-n]
+    extra = 0
+    min_num = 1
+
+
+class FileFormatInline(nested_admin.NestedTabularInline):
+    model = FileFormat
+    form = FileFormatAdminForm
+    verbose_name = "File format"
+    verbose_name_plural = "File formats"
+    # Define scope: [0-n]
+    extra = 0
+
+
+class AvailabilityInline(nested_admin.NestedTabularInline):
+    model = Availability
+    form = AvailabilityAdminForm
+    verbose_name = "Availability"
+    verbose_name_plural = "Availabilities"
+    # Define scope: [0-n]
+    extra = 0
+
+
+class IntervieweeInline(nested_admin.NestedTabularInline):
+    model = Interviewee
+    form = IntervieweeAdminForm
+    verbose_name = "Interviewee"
+    verbose_name_plural = "Interviewees"
+    # Define scope: [1-n]
+    extra = 0
+    min_num = 1
+
+
+class InterviewerInline(nested_admin.NestedTabularInline):
+    model = Interviewer
+    form = InterviewerAdminForm
+    verbose_name = "Interviewer"
+    verbose_name_plural = "Interviewers"
+    # Define scope: [1-n]
+    extra = 0
+    min_num = 1
+
+
+class TemporalCoverageInline(nested_admin.NestedTabularInline):
+    model = TemporalCoverage
+    form = TemporalCoverageAdminForm
+    verbose_name = "Temporal coverage"
+    verbose_name_plural = "Temporal coverages"
+    # Define scope: [0-n]
+    extra = 0
+
+
+class SpatialCoverageInline(nested_admin.NestedTabularInline):
+    model = SpatialCoverage
+    form = SpatialCoverageAdminForm
+    verbose_name = "Spatial coverage"
+    verbose_name_plural = "Spatial coverages"
+    # Define scope: [0-n]
+    extra = 0
+
+
+class GenreInline(nested_admin.NestedTabularInline):
+    model = Genre
+    form = GenreAdminForm
+    verbose_name = "Genre"
+    verbose_name_plural = "Genres"
+    # Define scope: [1-n]
+    extra = 0
+    min_num = 1
+
+
+class AnnotationInline(nested_admin.NestedTabularInline):
+    model = Annotation
+    form = AnnotationAdminForm
+    verbose_name = "Annotation"
+    verbose_name_plural = "Annotations"
+    # Define scope: [0-n]
+    extra = 0
+
+
+class AnonymisationInline(nested_admin.NestedTabularInline):
+    model = Anonymisation
+    form = AnonymisationAdminForm
+    verbose_name = "Anonymisation"
+    verbose_name_plural = "Anonymisations"
+    # Define scope: [0-n]
+    extra = 0
+
+
 class DescriptorAdmin(nested_admin.NestedModelAdmin):
     fieldsets = ( ('System', {'fields': ('identifier',  )}),
-                  ('Administrative', {'fields': (  )}),
-                  ('Descriptive',    {'fields': (  )}),
+                  ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
+                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
                 )
 
-    list_display = ['identifier', 'id']
-    search_fields = ['identifier']
+    # make sure the 'owner' is not shown - we determine that behind the scenes
+    exclude = ['owner']
+    list_display = ['identifier', 'id', 'projectTitle', 'interviewDate', 'modality']
+    search_fields = ['identifier', 'projectTitle', 'modality']
 
-    inlines = []
+    inlines = [LanguageInline, FileFormatInline, AvailabilityInline,
+               IntervieweeInline, InterviewerInline,
+               TemporalCoverageInline, SpatialCoverageInline,
+               GenreInline, AnnotationInline, AnonymisationInline]
 
     actions = []
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 1, 'cols': 80})},
         }
+
+    def get_ordering_field_columns():
+        return self.ordering
 
 
 class FieldChoiceAdmin(admin.ModelAdmin):
