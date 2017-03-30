@@ -31,19 +31,20 @@ class LanguageAdminForm(forms.ModelForm):
 
     class Meta:
         model = Language
-        fields = '__all__'
+        fields = ['name']
         widgets = { 'name': forms.Select(attrs={'width': 30}) }
 
     def __init__(self, *args, **kwargs):
         super(LanguageAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', INTERVIEW_LANGUAGE)
+        self.fields['name'].initial = choice_value("interview.language", "Dutch (Northern)")
 
 
 class FileFormatAdminForm(forms.ModelForm):
 
     class Meta:
         model = FileFormat
-        fields = '__all__'
+        fields = ['name']
         widgets = { 'name': forms.Select(attrs={'width': 30}) }
 
     def __init__(self, *args, **kwargs):
@@ -55,7 +56,7 @@ class AvailabilityAdminForm(forms.ModelForm):
 
     class Meta:
         model = Availability
-        fields = '__all__'
+        fields = ['name']
         widgets = { 'name': forms.Select(attrs={'width': 30}) }
 
     def __init__(self, *args, **kwargs):
@@ -67,7 +68,7 @@ class IntervieweeAdminForm(forms.ModelForm):
 
     class Meta:
         model = Interviewee
-        fields = '__all__'
+        fields = ['code', 'name', 'gender', 'age']
         widgets = {'code': forms.Textarea(attrs={'rows': 1, 'cols': 20}),
                    'name': forms.Textarea(attrs={'rows': 1, 'cols': 80}),
                    'gender': forms.Select(attrs={'width': 30}),
@@ -82,7 +83,7 @@ class InterviewerAdminForm(forms.ModelForm):
 
     class Meta:
         model = Interviewer
-        fields = '__all__'
+        fields = ['code', 'name', 'gender', 'age']
         widgets = {'code': forms.Textarea(attrs={'rows': 1, 'cols': 20}),
                    'name': forms.Textarea(attrs={'rows': 1, 'cols': 80}),
                    'gender': forms.Select(attrs={'width': 30}),
@@ -97,7 +98,7 @@ class TemporalCoverageAdminForm(forms.ModelForm):
 
     class Meta:
         model = TemporalCoverage
-        fields = '__all__'
+        fields = ['startYear', 'endYear']
         widgets = {'startYear': forms.Textarea(attrs={'rows': 1, 'cols': 20}),
                    'endYear': forms.Textarea(attrs={'rows': 1, 'cols': 20})}
 
@@ -106,7 +107,7 @@ class SpatialCoverageAdminForm(forms.ModelForm):
 
     class Meta:
         model = SpatialCoverage
-        fields = '__all__'
+        fields = ['country', 'place']
         widgets = {'country': forms.Select(attrs={'width': 30}),
                    'place': forms.Textarea(attrs={'rows': 1, 'cols': 80})  }
 
@@ -119,19 +120,20 @@ class GenreAdminForm(forms.ModelForm):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ['name']
         widgets = { 'name': forms.Select(attrs={'width': 30}) }
 
     def __init__(self, *args, **kwargs):
         super(GenreAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', INTERVIEW_GENRE)
+        self.fields['name'].initial = choice_value("interview.genre", "interviews")
 
 
 class AnnotationAdminForm(forms.ModelForm):
 
     class Meta:
         model = Annotation
-        fields = '__all__'
+        fields = ['type', 'mode', 'format']
         widgets = { 'type':   forms.Select(attrs={'width': 30}),
                     'mode':   forms.Select(attrs={'width': 30}),
                     'format': forms.Select(attrs={'width': 30}) }
@@ -141,17 +143,29 @@ class AnnotationAdminForm(forms.ModelForm):
         init_choices(self, 'type', ANNOTATION_TYPE)
         init_choices(self, 'mode', ANNOTATION_MODE)
         init_choices(self, 'format', ANNOTATION_FORMAT)
+        self.fields['type'].initial = choice_value("annotation.type", "orthographicTranscription")
 
 
 class AnonymisationAdminForm(forms.ModelForm):
 
     class Meta:
         model = Anonymisation
-        fields = '__all__'
+        fields = ['name']
         widgets = { 'name': forms.Select(attrs={'width': 30}) }
 
     def __init__(self, *args, **kwargs):
         super(AnonymisationAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', ANONYMISATION)
 
+
+class DescriptorAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Descriptor
+        fields = ['identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',]
+
+    def __init__(self, *args, **kwargs):
+        super(DescriptorAdminForm, self).__init__(*args, **kwargs)
+        init_choices(self, 'modality', INTERVIEW_MODALITY)
+        self.fields['modality'].initial = choice_value("interview.modality", "spoken")
 

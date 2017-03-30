@@ -9,6 +9,7 @@ from django.http import HttpRequest, HttpResponse
 from django.template import RequestContext, loader
 from django.contrib.admin.templatetags.admin_list import result_headers
 from django.db.models.functions import Lower
+from django.db.models import Q
 from django.utils import timezone
 import json
 from datetime import datetime
@@ -108,7 +109,7 @@ def make_descriptor_top():
     return top
         
             
-def add_collection_xml(item_this, crp):
+def add_descriptor_xml(item_this, crp):
     """Add the collection information from [item_this] to XML element [crp]"""
 
     # title (1-n)
@@ -256,10 +257,12 @@ class DescriptorListView(ListView):
     model = Descriptor
     context_object_name='transcription'
     template_name = 'transcription/overview.html'
-    order_cols = ['id', 'identifier']
+    order_cols = ['id', 'identifier', 'owner__name', 'projectTitle', 'interviewDate']
     order_heads = [{'name': 'id', 'order': 'o=1', 'type': 'int'}, 
                    {'name': 'Identifier', 'order': 'o=2', 'type': 'str'}, 
-                   {'name': 'Description', 'order': '', 'type': 'str'}]
+                   {'name': 'Owner', 'order': 'o=3', 'type': 'str'}, 
+                   {'name': 'Project', 'order': 'o=4', 'type': 'str'}, 
+                   {'name': 'Date', 'order': 'o=5', 'type': 'str'}]
 
     def render_to_response(self, context, **response_kwargs):
         """Check if downloading is needed or not"""
@@ -278,6 +281,7 @@ class DescriptorListView(ListView):
         # Figure out which ordering to take
         order = 'identifier'
         initial = self.request.GET
+        oUser = self.request.user
         bAscending = True
         sType = 'str'
         if 'o' in initial:
@@ -291,13 +295,16 @@ class DescriptorListView(ListView):
             else:
                 # order = "-" + order
                 self.order_heads[iOrderCol-1]['order'] = 'o={}'.format(iOrderCol)
+        lstQ = []
+        if not oUser.is_superuser:
+            lstQ.append(Q(owner=oUser))
         if sType == 'str':
-            qs = Descriptor.objects.order_by(Lower(order))
+            qs = Descriptor.objects.filter(*lstQ).select_related().order_by(Lower(order))
         else:
-            qs = Descriptor.objects.order_by(order)
+            qs = Descriptor.objects.filter(*lstQ).select_related().order_by(order)
         if not bAscending:
             qs = qs.reverse()
-        context['overview_list'] = qs.select_related()
+        context['overview_list'] = qs# qs.select_related()
         context['order_heads'] = self.order_heads
         # Return the calculated context
         return context
@@ -342,6 +349,88 @@ class DescriptorListView(ListView):
             # Create the HttpResponse object with the appropriate CSV header.
             response = HttpResponse(sXmlStr, content_type='text/xml')
             response['Content-Disposition'] = 'attachment; filename="ohmeta_all.xml"'
+        else:
+            # Return the error response
+            response = HttpResponse(sXmlStr)
+
+        # Return the result
+        return response
+
+    def get_queryset(self):
+
+        # Get the parameters passed on with the GET request
+        get = self.request.GET
+        oUser = self.request.user
+
+        # Start a list of query details
+        lstQ = []
+        # Possibly adapt the query to focus on tye current user
+        if not oUser.is_superuser:
+            lstQ.append(Q(owner=oUser))
+        qs = Descriptor.objects.filter(*lstQ).select_related()
+
+        return qs
+
+
+class DescriptorDetailView(DetailView):
+    """Details of a selected transcription descriptor"""
+
+    model = Descriptor
+    export_xml = True
+    context_object_name='descriptor'
+
+    def render_to_response(self, context, **response_kwargs):
+        """Check if downloading is needed or not"""
+        sType = self.request.GET.get('submit_type', '')
+        if sType == 'xml':
+            return self.download_to_xml(context)
+        elif self.export_xml and sType != '':
+            return self.render_to_xml(context)
+        else:
+            return super(DescriptorDetailView, self).render_to_response(context, **response_kwargs)
+        
+    def convert_to_xml(self, context):
+        """Convert the 'descriptor' object from the context to XML"""
+
+        # Create a top-level element, including CMD, Header and Resources
+        top = make_descriptor_top()
+
+        # Start components and this collection component
+        cmp = ET.SubElement(top, "Components")
+        # Add a <CorpusCollection> root that contains a list of <collection> objects
+        descrroot = ET.SubElement(cmp, "CorpusCollection")
+
+        # Access this particular collection
+        descriptor_this = context['descriptor']
+
+        # Add this collection to the xml
+        add_descriptor_xml(descriptor_this, descrroot)
+
+        # Convert the XML to a string
+        xmlstr = minidom.parseString(ET.tostring(top,encoding='utf-8')).toprettyxml(indent="  ")
+
+        # Validate the XML against the XSD
+        (bValid, oError) = validateXml(xmlstr)
+        if not bValid:
+            # Get error messages for all the errors
+
+            return (False, xsd_error_list(oError, xmlstr))
+
+        # Return this string
+        return (True, xmlstr)
+
+    def download_to_xml(self, context):
+        """Make the XML representation of this descriptor downloadable"""
+
+        # Construct a file name based on the identifier
+        itemThis = self.instance
+        sFileName = 'oh-descriptor-{}'.format(getattr(itemThis, 'identifier'))
+        # Get the XML of this collection
+        (bValid, sXmlStr) = self.convert_to_xml(context)
+        if bValid:
+            # Create the HttpResponse object with the appropriate CSV header.
+            response = HttpResponse(sXmlStr, content_type='text/xml')
+            response['Content-Disposition'] = 'attachment; filename="'+sFileName+'.xml"'
         else:
             # Return the error response
             response = HttpResponse(sXmlStr)

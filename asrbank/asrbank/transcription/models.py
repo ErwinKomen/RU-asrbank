@@ -134,6 +134,17 @@ def choice_english(field, num):
     except:
         return "(empty)"
 
+def choice_value(field, sEnglish):
+    """Get the machine value of the field with the indicated english_name"""
+
+    try:
+        result_list = FieldChoice.objects.filter(field__iexact=field).filter(english_name__iexact=sEnglish)
+        if (result_list == None or len(result_list) == 0):
+            return -1
+        return result_list[0].machine_value
+    except:
+        return -1
+
 def m2m_combi(items):
     try:
         if items == None:
@@ -181,7 +192,8 @@ class Language(models.Model):
     """Language that is used in a transcription"""
 
     # [1] Each language has a name
-    name = models.CharField("Language in collection", choices=build_choice_list(INTERVIEW_LANGUAGE), max_length=5, help_text=get_help(INTERVIEW_LANGUAGE), default='0')
+    name = models.CharField("Language in collection", choices=build_choice_list(INTERVIEW_LANGUAGE), max_length=5, 
+                            help_text=get_help(INTERVIEW_LANGUAGE), default='0')
     # [1]     Each descriptor can have [0-n] languages associated with it
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="languages")
 
@@ -195,7 +207,8 @@ class FileFormat(models.Model):
     """Format of an audio/video file"""
 
     # [1] Each language has a name
-    name = models.CharField("Format of audio/video file", choices=build_choice_list(AUDIOVIDEO_FORMAT), max_length=5, help_text=get_help(AUDIOVIDEO_FORMAT), default='0')
+    name = models.CharField("Format of audio/video file", choices=build_choice_list(AUDIOVIDEO_FORMAT), max_length=5, 
+                            help_text=get_help(AUDIOVIDEO_FORMAT), default='0')
     # [1]     Each descriptor can have [0-n] file formats associated with it
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="fileformats")
 
@@ -227,11 +240,12 @@ class Participant(models.Model):
     # [1] Obligatory code
     code = models.CharField("Code for this person",  max_length=MAX_STRING_LEN, blank=False, help_text=get_help(PARTICIPANT_CODE))
     # [0-1] Name of the participant
-    name = models.CharField("Name of the person",  max_length=MAX_STRING_LEN, blank=False, help_text=get_help(PARTICIPANT_NAME))
+    name = models.CharField("Name of the person",  max_length=MAX_STRING_LEN, blank=True, help_text=get_help(PARTICIPANT_NAME))
     # [0-1; closed] Gender of the participant
-    gender = models.CharField("Gender of the person", choices=build_choice_list(PARTICIPANT_GENDER), max_length=5, help_text=get_help(PARTICIPANT_GENDER), default='0')
+    gender = models.CharField("Gender of the person", choices=build_choice_list(PARTICIPANT_GENDER), max_length=5, 
+                              help_text=get_help(PARTICIPANT_GENDER), default='0', blank=True)
     # [0-1] Age of the participant as STRING
-    age = models.CharField("Age of the person",  max_length=MAX_STRING_LEN, blank=False, help_text=get_help(PARTICIPANT_AGE))
+    age = models.CharField("Age of the person",  max_length=MAX_STRING_LEN, blank=True, help_text=get_help(PARTICIPANT_AGE))
 
     def __str__(self):
         return self.code
@@ -365,8 +379,7 @@ class Descriptor(models.Model):
     identifier = models.CharField("Unique short descriptor identifier (10 characters max)", max_length=MAX_IDENTIFIER_LEN, default='-')
 
     # INTERNAL FIELD: Owner of this descriptor (1)
-    owner = models.CharField("Unique short descriptor identifier (10 characters max)", 
-                             max_length=MAX_STRING_LEN, default='-', blank=False, null=False)
+    owner = models.ForeignKey(User, blank=False, null=False)
 
     # ------------ ADMINISTRATIVE --------------
     # [1] Project title

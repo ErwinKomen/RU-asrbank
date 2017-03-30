@@ -24,10 +24,12 @@
         {% for descriptor in overview_list %}
           <tr>
             <td>{{descriptor.id}}</td>
-            <td><a href="/{{app_prefix }}admin/collection/collection/{{coll.pk}}/change/">{{descriptor.identifier}}</a></td>
-            <td>{{descriptor.description}}
+            <td><a href="/{{app_prefix }}admin/transcription/descriptor/{{descriptor.pk}}/change/">{{descriptor.identifier}}</a></td>
+            <td>{{descriptor.owner}}</td>
+            <td>{{descriptor.projectTitle}}</td>
+            <td>{{descriptor.interviewDate}}
               <span class="coll-xml"><a class="btn btn-success btn-xs" href="/{{app_prefix }}output/{{descriptor.pk}}?submit_type=xml">xml</a></span>
-              <span class="coll-xml"><a class="btn btn-error btn-xs" href="/{{app_prefix }}transcription/{{descriptor.pk}}?submit_type=">edit</a></span>
+              <span class="coll-xml"><a class="btn btn-error btn-xs" href="/{{app_prefix }}transcription/descriptor/{{descriptor.pk}}/change/">edit</a></span>
             </td>
           </tr>
         {% endfor %}

@@ -93,7 +93,7 @@ def main(prgName, argv) :
         errHandle.Status('Output is "' + flOutput + '"')
 
         # Call the function that converst input into output
-        if (collfix(flInput, flOutput)) :
+        if (csv2jsonfix(flInput, flOutput, "transcription.fieldchoice")) :
             errHandle.Status("Ready")
         else :
             errHandle.DoError("Could not complete")
@@ -107,12 +107,12 @@ def main(prgName, argv) :
 
 
 # ----------------------------------------------------------------------------------
-# Name :    collfix
-# Goal :    Create fixtures for the collection bank
+# Name :    csv2jsonfix
+# Goal :    Convert a CSV file to a JSON fixtures file
 # History:
 # 18/jun/2016    ERK Created
 # ----------------------------------------------------------------------------------
-def collfix(csv_file, output_file):
+def csv2jsonfix(csv_file, output_file, sModel):
     try:
         # Validate: input file exists
         if (not os.path.isfile(csv_file)): return False
@@ -122,7 +122,6 @@ def collfix(csv_file, output_file):
         iPkNum = 1          # Incremental PKs
         iMvNum = 1          # Incremental "machine_value" index per 'field' type
         sCurrentField = ""  # to note changes in field
-        sModel = "collection.fieldchoice"
         arFieldNames = []
 
         # Open source file to read line-by-line
@@ -184,7 +183,7 @@ def collfix(csv_file, output_file):
         # return positively
         return True
     except:
-        errHandle.DoError("collfix")
+        errHandle.DoError("csv2jsonfix")
         return False
 
 

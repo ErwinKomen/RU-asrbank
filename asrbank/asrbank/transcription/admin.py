@@ -199,6 +199,10 @@ class AnonymisationInline(nested_admin.NestedTabularInline):
 
 
 class DescriptorAdmin(nested_admin.NestedModelAdmin):
+
+    model = Descriptor
+    form = DescriptorAdminForm
+
     fieldsets = ( ('System', {'fields': ('identifier',  )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('topicList', 'modality', )}),
@@ -206,13 +210,14 @@ class DescriptorAdmin(nested_admin.NestedModelAdmin):
 
     # make sure the 'owner' is not shown - we determine that behind the scenes
     exclude = ['owner']
-    list_display = ['identifier', 'id', 'projectTitle', 'interviewDate', 'modality']
-    search_fields = ['identifier', 'projectTitle', 'modality']
+    list_display = ['identifier', 'id', 'owner', 'projectTitle', 'interviewDate']
+    search_fields = ['identifier', 'owner', 'projectTitle']
 
     inlines = [LanguageInline, FileFormatInline, AvailabilityInline,
                IntervieweeInline, InterviewerInline,
                TemporalCoverageInline, SpatialCoverageInline,
                GenreInline, AnnotationInline, AnonymisationInline]
+
 
     actions = []
     formfield_overrides = {
@@ -221,6 +226,17 @@ class DescriptorAdmin(nested_admin.NestedModelAdmin):
 
     def get_ordering_field_columns():
         return self.ordering
+
+    def save_model(self, request, obj, form, change):
+        obj.owner = request.user
+        super(DescriptorAdmin, self).save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        lstQ = []
+        if not request.user.is_superuser:
+            lstQ.append(Q(owner=request.user))
+        qs = Descriptor.objects.filter(*lstQ).select_related()
+        return qs
 
 
 class FieldChoiceAdmin(admin.ModelAdmin):
