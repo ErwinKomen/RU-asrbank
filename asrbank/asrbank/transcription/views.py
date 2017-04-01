@@ -295,15 +295,18 @@ class DescriptorListView(ListView):
             else:
                 # order = "-" + order
                 self.order_heads[iOrderCol-1]['order'] = 'o={}'.format(iOrderCol)
-        lstQ = []
-        if not oUser.is_superuser:
-            lstQ.append(Q(owner=oUser))
-        if sType == 'str':
-            qs = Descriptor.objects.filter(*lstQ).select_related().order_by(Lower(order))
+        if self.request.user.is_authenticated():
+            lstQ = []
+            if not oUser.is_superuser:
+                lstQ.append(Q(owner=oUser))
+            if sType == 'str':
+                qs = Descriptor.objects.filter(*lstQ).select_related().order_by(Lower(order))
+            else:
+                qs = Descriptor.objects.filter(*lstQ).select_related().order_by(order)
+            if not bAscending:
+                qs = qs.reverse()
         else:
-            qs = Descriptor.objects.filter(*lstQ).select_related().order_by(order)
-        if not bAscending:
-            qs = qs.reverse()
+            qs = None
         context['overview_list'] = qs# qs.select_related()
         context['order_heads'] = self.order_heads
         # Return the calculated context
@@ -367,7 +370,10 @@ class DescriptorListView(ListView):
         # Possibly adapt the query to focus on tye current user
         if not oUser.is_superuser:
             lstQ.append(Q(owner=oUser))
-        qs = Descriptor.objects.filter(*lstQ).select_related()
+        if self.request.user.is_authenticated():
+            qs = Descriptor.objects.filter(*lstQ).select_related()
+        else:
+            qs = None
 
         return qs
 
