@@ -9,7 +9,7 @@ from django import forms
 from functools import partial
 
 import copy  # (1) use python copy
-import nested_admin
+# import nested_admin
 import logging
 
 from asrbank.transcription.models import *
@@ -104,7 +104,7 @@ def copy_item(request=None):
     return redirect(sCurrent)
 
 
-class LanguageInline(nested_admin.NestedTabularInline):
+class LanguageInline(admin.TabularInline):
     model = Language
     form = LanguageAdminForm
     verbose_name = "Transcription language"
@@ -114,7 +114,7 @@ class LanguageInline(nested_admin.NestedTabularInline):
     min_num = 1
 
 
-class FileFormatInline(nested_admin.NestedTabularInline):
+class FileFormatInline(admin.TabularInline):
     model = FileFormat
     form = FileFormatAdminForm
     verbose_name = "File format"
@@ -123,7 +123,7 @@ class FileFormatInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class AvailabilityInline(nested_admin.NestedTabularInline):
+class AvailabilityInline(admin.TabularInline):
     model = Availability
     form = AvailabilityAdminForm
     verbose_name = "Availability"
@@ -132,7 +132,7 @@ class AvailabilityInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class IntervieweeInline(nested_admin.NestedTabularInline):
+class IntervieweeInline(admin.TabularInline):
     model = Interviewee
     form = IntervieweeAdminForm
     verbose_name = "Interviewee"
@@ -142,7 +142,7 @@ class IntervieweeInline(nested_admin.NestedTabularInline):
     min_num = 1
 
 
-class InterviewerInline(nested_admin.NestedTabularInline):
+class InterviewerInline(admin.TabularInline):
     model = Interviewer
     form = InterviewerAdminForm
     verbose_name = "Interviewer"
@@ -152,7 +152,7 @@ class InterviewerInline(nested_admin.NestedTabularInline):
     min_num = 1
 
 
-class TemporalCoverageInline(nested_admin.NestedTabularInline):
+class TemporalCoverageInline(admin.TabularInline):
     model = TemporalCoverage
     form = TemporalCoverageAdminForm
     verbose_name = "Temporal coverage"
@@ -161,7 +161,7 @@ class TemporalCoverageInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class SpatialCoverageInline(nested_admin.NestedTabularInline):
+class SpatialCoverageInline(admin.TabularInline):
     model = SpatialCoverage
     form = SpatialCoverageAdminForm
     verbose_name = "Spatial coverage"
@@ -170,7 +170,7 @@ class SpatialCoverageInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class GenreInline(nested_admin.NestedTabularInline):
+class GenreInline(admin.TabularInline):
     model = Genre
     form = GenreAdminForm
     verbose_name = "Genre"
@@ -178,9 +178,10 @@ class GenreInline(nested_admin.NestedTabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
+    validate_min = True
 
 
-class AnnotationInline(nested_admin.NestedTabularInline):
+class AnnotationInline(admin.TabularInline):
     model = Annotation
     form = AnnotationAdminForm
     verbose_name = "Annotation"
@@ -189,7 +190,7 @@ class AnnotationInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class AnonymisationInline(nested_admin.NestedTabularInline):
+class AnonymisationInline(admin.TabularInline):
     model = Anonymisation
     form = AnonymisationAdminForm
     verbose_name = "Anonymisation"
@@ -198,7 +199,7 @@ class AnonymisationInline(nested_admin.NestedTabularInline):
     extra = 0
 
 
-class DescriptorAdmin(nested_admin.NestedModelAdmin):
+class DescriptorAdmin(admin.ModelAdmin):
 
     model = Descriptor
     form = DescriptorAdminForm
@@ -237,6 +238,20 @@ class DescriptorAdmin(nested_admin.NestedModelAdmin):
             lstQ.append(Q(owner=request.user))
         qs = Descriptor.objects.filter(*lstQ).select_related()
         return qs
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        # Make sure that the DEFAULT values of Genre and Language are saved too
+        if formset.prefix == "genres" or formset.prefix == "languages":
+            # Save all the genre instances
+            for frmThis in formset.forms:
+                # Save this instance
+                frmThis.instance.save()
+        for instance in instances:
+            instance.save()
+        formset.save_m2m()
 
 
 class FieldChoiceAdmin(admin.ModelAdmin):

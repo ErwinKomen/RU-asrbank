@@ -25,7 +25,7 @@ class BootstrapAuthenticationForm(AuthenticationForm):
                                widget=forms.PasswordInput({
                                    'class': 'form-control',
                                    'placeholder':'Password'}))
-
+    
 
 class LanguageAdminForm(forms.ModelForm):
 
@@ -162,10 +162,11 @@ class DescriptorAdminForm(forms.ModelForm):
 
     class Meta:
         model = Descriptor
-        fields = ['identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',]
+        fields = ['identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality']
 
     def __init__(self, *args, **kwargs):
         super(DescriptorAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'modality', INTERVIEW_MODALITY)
         self.fields['modality'].initial = choice_value("interview.modality", "spoken")
+
 

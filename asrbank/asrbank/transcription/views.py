@@ -18,13 +18,13 @@ import xml.etree.ElementTree as ET
 from lxml import etree
 import os
 
-from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, XSD_NAME
+from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES
 from asrbank.transcription.models import *
 from asrbank.transcription.forms import *
 
 # Local variables
 XSI_CMD = "http://www.clarin.eu/cmd/"
-XSD_ID = "clarin.eu:cr1:p_1459844210473"
+XSD_ID = "clarin.eu:cr1:p_1487686159240"
 XSI_XSD = "https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.1/profiles/" + XSD_ID + "/xsd/"
 
 # General help functions
@@ -107,29 +107,129 @@ def make_descriptor_top():
     ET.SubElement(rsc, "ResourceRelationList")
     # Return the resulting top-level element
     return top
-        
-            
-def add_descriptor_xml(item_this, crp):
-    """Add the collection information from [item_this] to XML element [crp]"""
+                    
+def add_descriptor_xml(item_this, main):
+    """Add the DESCRIPTOR information from [item_this] to XML element [main]"""
 
-    # title (1-n)
-    add_element("1-n", item_this, "title", crp, foreign="name")
-    # description (0-1)
-    add_element("0-1", item_this, "description", crp)
-    # owner (0-n)
-    add_element("0-n", item_this, "owner", crp, foreign="name")
-    # genre (0-n)
-    add_element("0-n", item_this, "genre", crp, foreign="name", fieldchoice=GENRE_NAME)
-    # languageDisorder(0-n)
-    add_element("0-n", item_this, "languageDisorder", crp, foreign="name")
-    # There's no return value -- all has been added to [crp]
+    # [1] Project title
+    add_element("1", item_this, "ProjectTitle", main, field_name="projectTitle")
+    # [1] ID of the interview
+    add_element("1", item_this, "InterviewId", main, field_name="interviewId")
+    # [0-1] Date of the interview
+    add_element("0-1", item_this, "InterviewDate", main, field_name="interviewDate")
+    # [0-1] Length of the interview
+    add_element("0-1", item_this, "InterviewLength", main, field_name="interviewLength")
+    # [0-n] FileFormat
+    add_element("0-n", item_this, "FileFormat", main, 
+                field_name="fileformats", foreign="name", fieldchoice=AUDIOVIDEO_FORMAT)
+    # [0-n] Availability
+    add_element("0-n", item_this, "Availability", main, 
+                field_name="availabilities", foreign="name", fieldchoice=AVAILABILITY)
+    # [0-1] Copyright description
+    add_element("0-1", item_this, "Copyright", main, field_name="copyright")
+    # [0-1] Topic list
+    add_element("0-1", item_this, "TopicList", main, field_name="topicList")
+    # [1-n] Genre
+    add_element("1-n", item_this, "Genre", main, 
+                field_name="genres", foreign="name", fieldchoice=INTERVIEW_GENRE)
+    # [1] Project title
+    add_element("1", item_this, "Modality", main, field_name="modality", fieldchoice=INTERVIEW_MODALITY)
+    # [0-n] Anonymisation level
+    add_element("0-n", item_this, "Anonymisation", main, 
+                field_name="anonymisations", foreign="name", fieldchoice=ANONYMISATION)
+    # ==============================================================================
+    # [1-n] Language of the transcription
+    for lng_this in item_this.languages.all():
+        (sLngName, sLngCode) = get_language(lng_this.name)
+        # Validation
+        if sLngCode == "" or sLngCode == None:
+            bStop = True
+        else:
+            lngMain = ET.SubElement(main, "Language")
+            lngMainName = ET.SubElement(lngMain, "LanguageName")
+            lngMainName.text = sLngName
+            lngMainCode = ET.SubElement(lngMain, "ISO639")
+            lngMainCodeVal = ET.SubElement(lngMainCode, "iso-639-3-code")
+            lngMainCodeVal.text = sLngCode
+    # [1-n] Interviewee
+    for wee_this in item_this.interviewees.all():
+        # Start adding the sub-element
+        wee_sub = ET.SubElement(main, "Interviewee")
+        # [1] code
+        add_element("1", wee_this, "Code", wee_sub, field_name="code")
+        # [0-1] Name of the interviewee
+        add_element("0-1", wee_this, "Name", wee_sub, field_name="name")
+        # [0-1] Gender of the interviewee
+        add_element("0-1", wee_this, "Gender", wee_sub, field_name="gender", fieldchoice=PARTICIPANT_GENDER)
+        # [0-1] Age of the interviewee
+        add_element("0-1", wee_this, "Age", wee_sub, field_name="age")
+    # [1-n] Interviewer
+    for wer_this in item_this.interviewers.all():
+        # Start adding the sub-element
+        wer_sub = ET.SubElement(main, "Interviewer")
+        # [1] code
+        add_element("1", wer_this, "Code", wer_sub, field_name="code")
+        # [0-1] Name of the interviewer
+        add_element("0-1", wer_this, "Name", wer_sub, field_name="name")
+        # [0-1] Gender of the interviewer
+        add_element("0-1", wer_this, "Gender", wer_sub, field_name="gender", fieldchoice=PARTICIPANT_GENDER)
+        # [0-1] Age of the interviewer
+        add_element("0-1", wer_this, "Age", wer_sub, field_name="age")
+    # [0-n] Temporal coverage
+    for cov_this in item_this.temporalcoverages.all():
+        # Start adding the sub-element
+        cov_sub = ET.SubElement(main, "TemporalCoverage")
+        # [1] start year
+        add_element("1", cov_this, "StartYear", cov_sub, field_name="startYear")
+        # [1] end year
+        add_element("1", cov_this, "EndYear", cov_sub, field_name="endYear")
+    # [0-n] Spatial coverage
+    for cov_this in item_this.spatialcoverages.all():
+        # Start adding the sub-element
+        cov_sub = ET.SubElement(main, "SpatialCoverage")
+        # country (0-1)
+        cntry = cov_this.country
+        if cntry != None:
+            # Look up the country in the list
+            (sEnglish, sAlpha2) = get_country(cntry)
+            # Set the values 
+            cntMain = ET.SubElement(cov_sub, "Country")
+            cntMainName = ET.SubElement(cntMain, "CountryName")
+            cntMainCoding = ET.SubElement(cntMain, "CountryCoding")
+            cntMainName.text = sEnglish
+            cntMainCoding.text = sAlpha2
+        # [0-1] place (=city)
+        add_element("0-1", cov_this, "Place", cov_sub, field_name="place")
+    # annotation (0-n)
+    for ann_this in item_this.annotations.all(): 
+        # Add this annotation element
+        ann = ET.SubElement(main, "annotation")
+        # [1]   type
+        add_element("1", ann_this, "type", ann, fieldchoice=ANNOTATION_TYPE)
+        # [0-1] mode
+        add_element("0-1", ann_this, "mode", ann, fieldchoice=ANNOTATION_MODE)
+        # [0-1] format
+        add_element("0-1", ann_this, "format", ann, fieldchoice=ANNOTATION_FORMAT)
 
+
+def get_country(cntryCode):
+    # Get the country string according to field-choice
+    sCountry = choice_english(COVERAGE_SPATIAL_COUNTRY, cntryCode).strip()
+    sCountryAlt = sCountry + " (the)"
+    # Walk all country codes
+    for tplCountry in COUNTRY_CODES:
+        # Check for country name or alternative country name
+        if sCountry == tplCountry[1] or sCountryAlt == tplCountry[1]:
+            # REturn the correct country name and code
+            return (tplCountry[1], tplCountry[0])
+    # Empty
+    return (None, None)
 
 def get_language(lngCode):
     if str(lngCode) == "493": 
         x = 1
     # Get the language string according to the field choice
-    sLanguage = choice_english("language.name", lngCode).lower()
+    sLanguage = choice_english(INTERVIEW_LANGUAGE, lngCode).lower()
     # Walk all language codes
     for tplLang in LANGUAGE_CODE_LIST:
         # Check in column #2 for the language name (must be complete match)
@@ -138,7 +238,6 @@ def get_language(lngCode):
             return (sLanguage, tplLang[0])
     # Empty
     return (None, None)
-
 
 def validateXml(xmlstr):
     """Validate an XML string against an XSD schema
@@ -196,7 +295,6 @@ def xsd_error_list(lError, sXmlStr):
     # Finish the HTML feedback
     lHtml.append("</body></html>")
     return "\n".join(lHtml)
-
 
 def xsd_error_as_simple_string(error):
     """
@@ -320,8 +418,8 @@ class DescriptorListView(ListView):
 
         # Start components and this collection component
         cmp     = ET.SubElement(top, "Components")
-        # Add a <CorpusCollection> root that contains a list of <collection> objects
-        colroot = ET.SubElement(cmp, "CorpusCollection")
+        # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
+        colroot = ET.SubElement(cmp, "OHmetaDescriptor")
 
         # Walk all the collections
         for col_this in Descriptor.objects.all():
@@ -385,6 +483,18 @@ class DescriptorDetailView(DetailView):
     export_xml = True
     context_object_name='descriptor'
 
+    def get_object(self):
+        obj = super(DescriptorDetailView,self).get_object()
+        self.instance = obj
+        form = DescriptorAdminForm(instance=obj)
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super(DescriptorDetailView, self).get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        context['descriptor'] = self.instance
+        return context
+
     def render_to_response(self, context, **response_kwargs):
         """Check if downloading is needed or not"""
         sType = self.request.GET.get('submit_type', '')
@@ -403,8 +513,8 @@ class DescriptorDetailView(DetailView):
 
         # Start components and this collection component
         cmp = ET.SubElement(top, "Components")
-        # Add a <CorpusCollection> root that contains a list of <collection> objects
-        descrroot = ET.SubElement(cmp, "CorpusCollection")
+        # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
+        descrroot = ET.SubElement(cmp, "OHmetaDescriptor")
 
         # Access this particular collection
         descriptor_this = context['descriptor']

@@ -393,7 +393,7 @@ class Descriptor(models.Model):
     # [0-1; HH:MM:SS]
     interviewLength = models.TimeField("Length in time of the interview", default="00:00:00", blank=True, help_text=get_help(INTERVIEW_LENGTH))
     # [1-n; closed] - Language
-    # [0-n; open??] - FileFormat
+    # [0-n; closed] - FileFormat
     # [0-n; closed] - Availability
     # [0-1] Copyright description
     copyright = models.TextField("Copyright for this transcription", blank=True, help_text=get_help(COPYRIGHT))
@@ -417,4 +417,23 @@ class Descriptor(models.Model):
 
     def __str__(self):
         return self.identifier
+
+    @classmethod
+    def create(cls, **kwargs):
+        """Create a new instance of Descriptor"""
+
+        # Create this new instance
+        instance = cls(kwargs)
+
+        # Add default one-to-many relations, as appropriate...
+
+        # Return the result
+        return instance
+
+    def save(self, **kwargs):
+        # Do the initial saving
+        instance = super(Descriptor, self).save(**kwargs)
+        # Check for obligatory 1-n relations
+        genres = self.genres.all()
+
 
