@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^registry', RedirectView.as_view(url='/'+pfx+'admin/transcription/descriptor/'), name='registry'),
     url(r'^overview/$', DescriptorListView.as_view(), name='overview'),
     url(r'^output/(?P<pk>\d+)', DescriptorDetailView.as_view(), name='output'),
+    url(r'^signup/$', asrbank.transcription.views.signup, name='signup'),
 
     url(r'^login/$',
         django.contrib.auth.views.login,

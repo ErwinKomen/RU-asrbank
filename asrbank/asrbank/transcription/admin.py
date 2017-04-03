@@ -204,13 +204,13 @@ class DescriptorAdmin(admin.ModelAdmin):
     model = Descriptor
     form = DescriptorAdminForm
 
-    fieldsets = ( ('System', {'fields': ('identifier',  )}),
+    fieldsets = ( ('System', {'fields': ('identifier', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('topicList', 'modality', )}),
                 )
 
     # make sure the 'owner' is not shown - we determine that behind the scenes
-    exclude = ['owner']
+    # exclude = ['owner']
     list_display = ['identifier', 'id', 'owner', 'projectTitle', 'interviewDate']
     search_fields = ['identifier', 'owner', 'projectTitle']
 
@@ -228,8 +228,26 @@ class DescriptorAdmin(admin.ModelAdmin):
     def get_ordering_field_columns():
         return self.ordering
 
+    def get_form(self, request, obj=None, **kwargs):
+        if request.user.is_superuser:
+            self.exclude = []
+            self.fieldsets  = ( ('System', {'fields': ('identifier', 'owner',)}),
+                  ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
+                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
+                )
+        else:
+            self.exclude = ['owner']
+            self.fieldsets  = ( ('System', {'fields': ('identifier', )}),
+                  ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
+                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
+                )
+        form = super(DescriptorAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
     def save_model(self, request, obj, form, change):
-        obj.owner = request.user
+        # Only supply owner if not specified
+        if obj.owner == None or obj.owner.is_anonymous():
+            obj.owner = request.user
         super(DescriptorAdmin, self).save_model(request, obj, form, change)
 
     def get_queryset(self, request):

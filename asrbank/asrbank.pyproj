@@ -62,6 +62,7 @@
     <Content Include="asrbank\templates\admin\base.html" />
     <Content Include="asrbank\transcription\static\transcription\scripts\asrbank.js" />
     <Content Include="asrbank\transcription\templates\transcription\overview.html" />
+    <Content Include="asrbank\transcription\templates\transcription\signup.html" />
     <Content Include="asrbank\transcription\templates\transcription\topnav.html" />
     <Content Include="requirements.txt" />
     <Content Include="asrbank\transcription\static\transcription\content\bootstrap.css" />

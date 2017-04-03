@@ -4,10 +4,12 @@ Definition of views.
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template import RequestContext, loader
 from django.contrib.admin.templatetags.admin_list import result_headers
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
 from django.db.models.functions import Lower
 from django.db.models import Q
 from django.utils import timezone
@@ -348,6 +350,29 @@ def about(request):
             'year':datetime.now().year,
         }
     )
+
+def signup(request):
+    """Provide basic sign up and validation of it """
+
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            # Save the form
+            form.save()
+            # Create the user
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            # also make sure that the user gets into the STAFF,
+            #      otherwise he/she may not see the admin pages
+            user = authenticate(username=username, 
+                                password=raw_password,
+                                is_staff=True)
+            # Log in as the user
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'transcription/signup.html', {'form': form})
 
 class DescriptorListView(ListView):
     """Listview of transcriptions"""
