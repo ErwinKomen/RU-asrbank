@@ -10,6 +10,7 @@ from django.template import RequestContext, loader
 from django.contrib.admin.templatetags.admin_list import result_headers
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Group
 from django.db.models.functions import Lower
 from django.db.models import Q
 from django.utils import timezone
@@ -367,6 +368,11 @@ def signup(request):
             user = authenticate(username=username, 
                                 password=raw_password,
                                 is_staff=True)
+            user.is_staff = True
+            user.save()
+            # Add user to the "RegistryUser" group
+            g = Group.objects.get(name="RegistryUser")
+            g.user_set.add(user)
             # Log in as the user
             login(request, user)
             return redirect('home')
