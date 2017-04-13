@@ -80,7 +80,7 @@ class HelpChoice(models.Model):
         return help_text
 
 
-def build_choice_list(field, position=None, subcat=None):
+def build_choice_list(field, position=None, subcat=None, maybe_empty=False):
     """Create a list of choice-tuples"""
 
     choice_list = [];
@@ -91,7 +91,10 @@ def build_choice_list(field, position=None, subcat=None):
         if FieldChoice.objects == None:
             # Take a default list
             choice_list = [('0','-'),('1','N/A')]
+            unique_list = [('0','-'),('1','N/A')]
         else:
+            if maybe_empty:
+                choice_list = [('0','-')]
             for choice in FieldChoice.objects.filter(field__iexact=field):
                 # Default
                 sEngName = ""
@@ -192,7 +195,7 @@ class Language(models.Model):
     """Language that is used in a transcription"""
 
     # [1] Each language has a name
-    name = models.CharField("Language in collection", choices=build_choice_list(INTERVIEW_LANGUAGE), max_length=5, 
+    name = models.CharField("Language used in interview", choices=build_choice_list(INTERVIEW_LANGUAGE), max_length=5, 
                             help_text=get_help(INTERVIEW_LANGUAGE), default='0')
     # [1]     Each descriptor can have [0-n] languages associated with it
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="languages")
@@ -242,7 +245,7 @@ class Participant(models.Model):
     # [0-1] Name of the participant
     name = models.CharField("Name of the person",  max_length=MAX_STRING_LEN, blank=True, help_text=get_help(PARTICIPANT_NAME))
     # [0-1; closed] Gender of the participant
-    gender = models.CharField("Gender of the person", choices=build_choice_list(PARTICIPANT_GENDER), max_length=5, 
+    gender = models.CharField("Gender of the person", choices=build_choice_list(PARTICIPANT_GENDER, maybe_empty=True), max_length=5, 
                               help_text=get_help(PARTICIPANT_GENDER), default='0', blank=True)
     # [0-1] Age of the participant as STRING
     age = models.CharField("Age of the person",  max_length=MAX_STRING_LEN, blank=True, help_text=get_help(PARTICIPANT_AGE))
@@ -286,9 +289,11 @@ class TemporalCoverage(models.Model):
         verbose_name_plural = "Spatial coverages"
 
     # == Start year: yyyy
-    startYear = models.CharField("First year covered by the transcription", max_length=20, default=str(datetime.now().year))
+    startYear = models.CharField("First year covered by the transcription", max_length=20, 
+                               help_text="Please use the following format: <em>YYYY</em>.")
     # == End year: yyyy
-    endYear = models.CharField("Last year covered by the transcription", max_length=20, default=str(datetime.now().year))
+    endYear = models.CharField("Last year covered by the transcription", max_length=20,
+                               help_text="Please use the following format: <em>YYYY</em>.")
     # [1]     Each descriptor can have [0-n] spatial coverages associated with it
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="temporalcoverages")
 
@@ -305,7 +310,9 @@ class SpatialCoverage(models.Model):
         verbose_name_plural = "Spatial coverages"
 
     # == country (0-1;c) (name+ISO-3166 code)
-    country = models.CharField("Country included in this spatial coverage", choices=build_choice_list(COVERAGE_SPATIAL_COUNTRY), max_length=5, help_text=get_help(COVERAGE_SPATIAL_COUNTRY), default='0')
+    country = models.CharField("Country included in this spatial coverage", 
+                               choices=build_choice_list(COVERAGE_SPATIAL_COUNTRY, maybe_empty=True), 
+                               max_length=5, help_text=get_help(COVERAGE_SPATIAL_COUNTRY), default='0')
     # [0-1] place
     place = models.CharField("Place (city) for this spatial coverage", max_length=80, help_text=get_help(COVERAGE_SPATIAL_PLACE), blank=True)
     # [1]     Each descriptor can have [0-n] spatial coverages associated with it
@@ -321,7 +328,8 @@ class Genre(models.Model):
     """Genre of transcription as a whole"""
 
     # (1; c)
-    name = models.CharField("Genre of this transcription", choices=build_choice_list(INTERVIEW_GENRE), max_length=5, help_text=get_help(INTERVIEW_GENRE), default='0')
+    name = models.CharField("Genre", choices=build_choice_list(INTERVIEW_GENRE), 
+                            max_length=5, help_text=get_help(INTERVIEW_GENRE), default='0')
     # [1]     Each descriptor can have [1-n] genres
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="genres")
 
@@ -337,10 +345,10 @@ class Annotation(models.Model):
     type = models.CharField("Kind of annotation", choices=build_choice_list(ANNOTATION_TYPE), max_length=5, 
                             help_text=get_help(ANNOTATION_TYPE), default='0')
     # [0-1]
-    mode = models.CharField("Annotation mode", choices=build_choice_list(ANNOTATION_MODE), max_length=5, 
+    mode = models.CharField("Annotation mode", choices=build_choice_list(ANNOTATION_MODE, maybe_empty=True), max_length=5, 
                             help_text=get_help(ANNOTATION_MODE), blank = True)
     # [0-1]
-    format = models.CharField("Annotation format", choices=build_choice_list(ANNOTATION_FORMAT), max_length=5, 
+    format = models.CharField("Annotation format", choices=build_choice_list(ANNOTATION_FORMAT, maybe_empty=True), max_length=5, 
                               help_text=get_help(ANNOTATION_FORMAT), blank = True)
     # [1]     Each descriptor can have [0-n] annotations
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="annotations")
@@ -396,7 +404,7 @@ class Descriptor(models.Model):
     # [0-n; closed] - FileFormat
     # [0-n; closed] - Availability
     # [0-1] Copyright description
-    copyright = models.TextField("Copyright for this transcription", blank=True, help_text=get_help(COPYRIGHT))
+    copyright = models.TextField("Copyright for this interview", blank=True, help_text=get_help(COPYRIGHT))
 
     # ------------- DESCRIPTIVE ---------------
     # [1-n]  - Interviewee
@@ -409,7 +417,7 @@ class Descriptor(models.Model):
     # [1-n; closed]        - Genres
 
     # [1] Modality
-    modality = models.CharField("Transcription modality", choices=build_choice_list(INTERVIEW_MODALITY), max_length=5, 
+    modality = models.CharField("Modality", choices=build_choice_list(INTERVIEW_MODALITY), max_length=5, 
                             help_text=get_help(INTERVIEW_MODALITY), default='0')
     # [0-n] Annotations
     # [0-n] Anonymisation levels

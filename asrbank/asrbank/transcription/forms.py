@@ -5,15 +5,38 @@ Definition of forms.
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+import re       # Regular expession for validation
 
 from asrbank.transcription.models import *
+pat_Year = re.compile("^[0-9][0-9][0-9][0-9]$")
 
 
-def init_choices(obj, sFieldName, sSet):
+def init_choices(obj, sFieldName, sSet, maybe_empty=False):
     if (obj.fields != None and sFieldName in obj.fields):
-        obj.fields[sFieldName].choices = build_choice_list(sSet)
+        obj.fields[sFieldName].choices = build_choice_list(sSet, maybe_empty=maybe_empty)
         obj.fields[sFieldName].help_text = get_help(sSet)
+
+
+def validate_year(value):
+    if value == None or value == "":
+        return 'Please specify a year'
+    if value != "unknown" and value != "-":
+        # Now it must be an integer
+        if not pat_Year.match(value):
+            return 'Specify a year (JJJJ) or "unknown"'
+        # Convert to number
+        try:
+            iValue = int(value)
+        except:
+            return 'Specify a year (JJJJ) or "unknown"'
+        # Test the number
+        if iValue > datetime.now().year + 10:
+            return 'The year may not be larger than the current year + 10'
+        if iValue < 0:
+            return 'The year must be a positive number'
+    return ""
 
 
 class BootstrapAuthenticationForm(AuthenticationForm):
@@ -48,7 +71,7 @@ class LanguageAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(LanguageAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', INTERVIEW_LANGUAGE)
-        self.fields['name'].initial = choice_value("interview.language", "Dutch (Northern)")
+        self.fields['name'].initial = choice_value(INTERVIEW_LANGUAGE, "unknown")
 
 
 class FileFormatAdminForm(forms.ModelForm):
@@ -61,6 +84,7 @@ class FileFormatAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FileFormatAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', AUDIOVIDEO_FORMAT)
+        self.fields['name'].initial = choice_value(AUDIOVIDEO_FORMAT, "unknown")
 
 
 class AvailabilityAdminForm(forms.ModelForm):
@@ -73,6 +97,7 @@ class AvailabilityAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AvailabilityAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', AVAILABILITY)
+        self.fields['name'].initial = choice_value(AVAILABILITY, "unknown")
 
 
 class IntervieweeAdminForm(forms.ModelForm):
@@ -87,7 +112,8 @@ class IntervieweeAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(IntervieweeAdminForm, self).__init__(*args, **kwargs)
-        init_choices(self, 'gender', PARTICIPANT_GENDER)
+        init_choices(self, 'gender', PARTICIPANT_GENDER, True)
+        self.fields['gender'].initial = '0'
 
 
 class InterviewerAdminForm(forms.ModelForm):
@@ -102,7 +128,8 @@ class InterviewerAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(InterviewerAdminForm, self).__init__(*args, **kwargs)
-        init_choices(self, 'gender', PARTICIPANT_GENDER)
+        init_choices(self, 'gender', PARTICIPANT_GENDER, True)
+        self.fields['gender'].initial = choice_value(PARTICIPANT_GENDER, "unknown")
 
 
 class TemporalCoverageAdminForm(forms.ModelForm):
@@ -113,6 +140,23 @@ class TemporalCoverageAdminForm(forms.ModelForm):
         widgets = {'startYear': forms.Textarea(attrs={'rows': 1, 'cols': 20}),
                    'endYear': forms.Textarea(attrs={'rows': 1, 'cols': 20})}
 
+    def clean(self):
+        cleaned_data = super(TemporalCoverageAdminForm, self).clean()
+        # Treat the first year
+        yr1 = cleaned_data['startYear']
+        val_yr1 = validate_year(yr1)
+        if val_yr1 != "":
+            raise forms.ValidationError(val_yr1)
+        # Treat the second year
+        yr2 = cleaned_data['endYear']
+        val_yr2 = validate_year(yr2)
+        if val_yr2 != "":
+            raise forms.ValidationError(val_yr2)
+        # Check if we may continue
+        if val_yr1 == "" and val_yr2 == "":
+            # Compare the values
+            if pat_Year.match(yr2) and pat_Year.match(yr1) and int(yr2) < int(yr1):
+                raise forms.ValidationError("The end year must be later than the start year")
 
 class SpatialCoverageAdminForm(forms.ModelForm):
 
@@ -124,7 +168,8 @@ class SpatialCoverageAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SpatialCoverageAdminForm, self).__init__(*args, **kwargs)
-        init_choices(self, 'country', COVERAGE_SPATIAL_COUNTRY)
+        init_choices(self, 'country', COVERAGE_SPATIAL_COUNTRY, True)
+        self.fields['country'].initial = '0'
 
 
 class GenreAdminForm(forms.ModelForm):
@@ -137,7 +182,7 @@ class GenreAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GenreAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', INTERVIEW_GENRE)
-        self.fields['name'].initial = choice_value("interview.genre", "interviews")
+        self.fields['name'].initial = choice_value(INTERVIEW_GENRE, "interviews")
 
 
 class AnnotationAdminForm(forms.ModelForm):
@@ -152,9 +197,11 @@ class AnnotationAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AnnotationAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'type', ANNOTATION_TYPE)
-        init_choices(self, 'mode', ANNOTATION_MODE)
-        init_choices(self, 'format', ANNOTATION_FORMAT)
-        self.fields['type'].initial = choice_value("annotation.type", "orthographicTranscription")
+        init_choices(self, 'mode', ANNOTATION_MODE, True)
+        init_choices(self, 'format', ANNOTATION_FORMAT, True)
+        self.fields['type'].initial = choice_value(ANNOTATION_TYPE, "orthographicTranscription")
+        self.fields['mode'].initial = '0'
+        self.fields['format'].initial = '0'
 
 
 class AnonymisationAdminForm(forms.ModelForm):
@@ -167,6 +214,7 @@ class AnonymisationAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AnonymisationAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'name', ANONYMISATION)
+        self.fields['name'].initial = choice_value(ANONYMISATION, "other")
 
 
 class DescriptorAdminForm(forms.ModelForm):
@@ -178,6 +226,6 @@ class DescriptorAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DescriptorAdminForm, self).__init__(*args, **kwargs)
         init_choices(self, 'modality', INTERVIEW_MODALITY)
-        self.fields['modality'].initial = choice_value("interview.modality", "spoken")
+        self.fields['modality'].initial = choice_value(INTERVIEW_MODALITY, "spoken")
 
 

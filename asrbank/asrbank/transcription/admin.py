@@ -112,6 +112,7 @@ class LanguageInline(admin.TabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
+    insert_after = 'interviewLength'
 
 
 class FileFormatInline(admin.TabularInline):
@@ -121,6 +122,7 @@ class FileFormatInline(admin.TabularInline):
     verbose_name_plural = "File formats"
     # Define scope: [0-n]
     extra = 0
+    insert_after = 'interviewLength'
 
 
 class AvailabilityInline(admin.TabularInline):
@@ -130,6 +132,7 @@ class AvailabilityInline(admin.TabularInline):
     verbose_name_plural = "Availabilities"
     # Define scope: [0-n]
     extra = 0
+    insert_after = 'interviewLength'
 
 
 class IntervieweeInline(admin.TabularInline):
@@ -140,6 +143,7 @@ class IntervieweeInline(admin.TabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
+    insert_after = 'copyright'
 
 
 class InterviewerInline(admin.TabularInline):
@@ -150,6 +154,7 @@ class InterviewerInline(admin.TabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
+    insert_after = 'copyright'
 
 
 class TemporalCoverageInline(admin.TabularInline):
@@ -159,6 +164,7 @@ class TemporalCoverageInline(admin.TabularInline):
     verbose_name_plural = "Temporal coverages"
     # Define scope: [0-n]
     extra = 0
+    insert_after = "topicList"
 
 
 class SpatialCoverageInline(admin.TabularInline):
@@ -168,6 +174,7 @@ class SpatialCoverageInline(admin.TabularInline):
     verbose_name_plural = "Spatial coverages"
     # Define scope: [0-n]
     extra = 0
+    insert_after = "topicList"
 
 
 class GenreInline(admin.TabularInline):
@@ -179,6 +186,7 @@ class GenreInline(admin.TabularInline):
     extra = 0
     min_num = 1
     validate_min = True
+    insert_after = "topicList"
 
 
 class AnnotationInline(admin.TabularInline):
@@ -188,6 +196,7 @@ class AnnotationInline(admin.TabularInline):
     verbose_name_plural = "Annotations"
     # Define scope: [0-n]
     extra = 0
+    insert_after = "modality"
 
 
 class AnonymisationInline(admin.TabularInline):
@@ -197,6 +206,7 @@ class AnonymisationInline(admin.TabularInline):
     verbose_name_plural = "Anonymisations"
     # Define scope: [0-n]
     extra = 0
+    insert_after = "modality"
 
 
 class DescriptorAdmin(admin.ModelAdmin):
@@ -204,10 +214,13 @@ class DescriptorAdmin(admin.ModelAdmin):
     model = Descriptor
     form = DescriptorAdminForm
 
-    fieldsets = ( ('System', {'fields': ('identifier', )}),
-                  ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
-                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
-                )
+    #fieldsets = ( ('System', {'fields': ('identifier', )}),
+    #              ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
+    #              ('Descriptive',    {'fields': ('topicList', 'modality', )}),
+    #            )
+
+    # Instead, define the fields as follows:
+    fields = ('identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',)
 
     # make sure the 'owner' is not shown - we determine that behind the scenes
     # exclude = ['owner']
