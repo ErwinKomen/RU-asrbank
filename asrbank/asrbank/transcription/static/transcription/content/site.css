@@ -30,6 +30,28 @@ div.breadcrumbs {
     display: none;
 }
 
+/* Nested fieldset headings */
+fieldset fieldset h2 {
+  background-color: lightblue !important;
+  color: darkblue !important;
+  text-transform: none !important;
+  /* Last resort: don't display the heading at all */
+  display: none;
+}
+/* Nested fieldset field names */
+fieldset fieldset table th.required {
+  /* font-weight: bold; /* */
+  /* color: #666; /* */
+  /* text-transform: capitalize;  /* */
+  font-size: 13px;
+}
+fieldset fieldset table th span {
+  text-transform: none;
+}
+.required-star {
+  color: red;
+}
+
 input.input-validation-error {
     border: 1px solid #b94a48;
 }

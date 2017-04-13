@@ -15,10 +15,17 @@
         <h2>Getting started</h2>
         <p>
           The OH-Metadata Registry has been designed by the Technical Service Group of the Humanities Lab at the Radboud University Nijmegen.
-          Any researcher is invited to create a log in and maintain his or her own collection of OH metadata items.
+          Any researcher is invited to registrate (create an account) and maintain his or her own collection of OH metadata.
           Collections of one researcher are <i>not</i> visible to other researchers.
         </p>
-        <p><a class="btn btn-default" href="mailto:e.komen@let.ru.nl">Request access &raquo;</a></p>
+        <p>
+          {% if user.is_authenticated %}
+          (See the <b>Extra</b> menu for logout and other options)
+          {% else %}
+          <a class="btn btn-default" href="{% url 'login' %}"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>Log in</a>
+          <a class="btn btn-default" href="{% url 'signup' %}">Sign up</a>
+          {% endif %}
+        </p>
     </div>
     <div class="col-md-6">
         <h2>Define OH metadata items</h2>
