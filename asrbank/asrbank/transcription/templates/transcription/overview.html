@@ -2,7 +2,12 @@
 
 {% block content %}
     {% if overview_list %}
-      <h3>Available descriptors</h3>
+      <h3>Available metadata records</h3>
+      <div id="content-main">
+        <ul class="object-tools">
+          <li><a class="addlink" href="/{{app_prefix }}admin/transcription/descriptor/add">Add a metadata record</a></li>
+        </ul>
+      </div>
       <table class="table table-hover">
         <thead>
           <tr>
@@ -29,7 +34,7 @@
             <td>{{descriptor.projectTitle}}</td>
             <td>{{descriptor.interviewDate}}
               <span class="coll-xml"><a class="btn btn-success btn-xs" href="/{{app_prefix }}output/{{descriptor.pk}}?submit_type=xml">xml</a></span>
-              <span class="coll-xml"><a class="btn btn-error btn-xs" href="/{{app_prefix }}transcription/descriptor/{{descriptor.pk}}/change/">edit</a></span>
+              <span class="coll-xml"><a class="btn btn-error btn-xs" href="/{{app_prefix }}admin/transcription/descriptor/{{descriptor.pk}}/change/">edit</a></span>
             </td>
           </tr>
         {% endfor %}

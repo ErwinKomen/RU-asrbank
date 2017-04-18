@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
 from django.core.urlresolvers import resolve
 from django.db.models import Q
 from django.forms import Textarea
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django import forms
 from functools import partial
@@ -214,26 +216,23 @@ class DescriptorAdmin(admin.ModelAdmin):
     model = Descriptor
     form = DescriptorAdminForm
 
-    #fieldsets = ( ('System', {'fields': ('identifier', )}),
-    #              ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
-    #              ('Descriptive',    {'fields': ('topicList', 'modality', )}),
-    #            )
+    # Define the fields preliminarily -- full definition is done in [get_form()]
+    fields = ('identifier','access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',)
 
-    # Instead, define the fields as follows:
-    fields = ('identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',)
-
-    # make sure the 'owner' is not shown - we determine that behind the scenes
-    # exclude = ['owner']
-    list_display = ['identifier', 'id', 'owner', 'projectTitle', 'interviewDate']
+    # Note: the 'owner' can only be changed by the administrator
+    #       (This statement depends on the user-status: exclude = ['owner']  )
+    #       (See get_form() for details                                      )
+    list_display = ['identifier_column', 'id', 'owner', 'access', 'projectTitle', 'interviewDate']
     search_fields = ['identifier', 'owner', 'projectTitle']
+    list_filter = ['access']
 
     inlines = [LanguageInline, FileFormatInline, AvailabilityInline,
                IntervieweeInline, InterviewerInline,
                TemporalCoverageInline, SpatialCoverageInline,
                GenreInline, AnnotationInline, AnonymisationInline]
-
-
+    # Any actions for the admin form
     actions = []
+    # Make sure text areas are shown wide enough on this level
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 1, 'cols': 80})},
         }
@@ -242,18 +241,21 @@ class DescriptorAdmin(admin.ModelAdmin):
         return self.ordering
 
     def get_form(self, request, obj=None, **kwargs):
+        """Determine who can see which fields, and how the fields appear"""
+
         if request.user.is_superuser:
             self.exclude = []
-            self.fieldsets  = ( ('System', {'fields': ('identifier', 'owner',)}),
+            self.fieldsets  = ( ('System', {'fields': ('identifier', 'owner','access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('topicList', 'modality', )}),
                 )
         else:
             self.exclude = ['owner']
-            self.fieldsets  = ( ('System', {'fields': ('identifier', )}),
+            self.fieldsets  = ( ('System', {'fields': ('identifier', 'access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('topicList', 'modality', )}),
                 )
+        # Continue with regular form-loading
         form = super(DescriptorAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -284,6 +286,23 @@ class DescriptorAdmin(admin.ModelAdmin):
             instance.save()
         formset.save_m2m()
 
+    def response_add(self, request, obj, post_url_continue="../%s/"):
+        if not '_continue' in request.POST:
+            if '_addanother' in request.POST:
+                return HttpResponseRedirect("/"+APP_PREFIX+"admin/transcription/descriptor/add")
+            else:
+                return HttpResponseRedirect("/"+APP_PREFIX+"overview/")
+        else:
+            return super(DescriptorAdmin, self).response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        if not '_continue' in request.POST:
+            if '_addanother' in request.POST:
+                return HttpResponseRedirect("/"+APP_PREFIX+"admin/transcription/descriptor/add")
+            else:
+                return HttpResponseRedirect("/"+APP_PREFIX+"overview/")
+        else:
+            return super(DescriptorAdmin, self).response_change(request, obj)
 
 class FieldChoiceAdmin(admin.ModelAdmin):
     readonly_fields=['machine_value']
@@ -299,8 +318,8 @@ class FieldChoiceAdmin(admin.ModelAdmin):
                 # The field does not yet occur within FieldChoice
                 # Future: ask user if that is what he wants (don't know how...)
                 # For now: assume user wants to add a new field (e.g: wordClass)
-                # NOTE: start with '0'
-                obj.machine_value = 0
+                # NOTE: start with '1'
+                obj.machine_value = 1
             else:
                 # Calculate highest currently occurring value
                 highest_machine_value = max([field_choice.machine_value for field_choice in qs])
@@ -310,9 +329,34 @@ class FieldChoiceAdmin(admin.ModelAdmin):
         obj.save()
 
 
+class HelpUrlFilter(SimpleListFilter):
+    """Custom filter to divide the help items in those that have a URL and not"""
+
+    title = 'Has a URL'
+    parameter_name = 'has_url'
+
+    def lookups(self, request, model_admin):
+        return [('yes', 'yes'), ('no', 'no')]
+
+    def queryset(self, request, queryset):
+        """Return a filtered queryset"""
+
+        if self.value() == 'yes':
+            return queryset.exclude(help_url='')
+        elif self.value() == 'no':
+            return queryset.filter(help_url='')
+        else:
+            return queryset
+
+
+class HelpChoiceAdmin(admin.ModelAdmin):
+    list_display = ['field', 'display_name', 'searchable', 'help_url']
+    list_filter = ['searchable', HelpUrlFilter]
+
+
 # Models that serve others
 admin.site.register(FieldChoice, FieldChoiceAdmin)
-admin.site.register(HelpChoice)
+admin.site.register(HelpChoice, HelpChoiceAdmin)
 
 # -- descriptor as a whole
 admin.site.register(Descriptor, DescriptorAdmin)

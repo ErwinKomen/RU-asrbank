@@ -48,7 +48,7 @@ def add_element(optionality, item_this, el_name, crp, **kwargs):
     if "subname" in kwargs: sub_name = kwargs["subname"]
     if optionality == "0-1" or optionality == "1":
         item_value = item_this_el
-        if optionality == "1" or item_value != None:
+        if optionality == "1" or (item_value != None and item_value != "(empty)"):
             if foreign != "" and not isinstance(item_this_el, str):
                 item_value = getattr(item_this_el, foreign)
             if field_choice != "": item_value = choice_english(field_choice, item_value)
@@ -65,7 +65,7 @@ def add_element(optionality, item_this, el_name, crp, **kwargs):
                         item_value = arPart[1]
                     else:
                         item_value = ""
-            if item_value != "":
+            if item_value != "" and item_value != "(empty)":
                 descr_element = ET.SubElement(crp, sub_name)
                 descr_element.text = item_value
     elif optionality == "1-n" or optionality == "0-n":
@@ -183,9 +183,9 @@ def add_descriptor_xml(item_this, main):
         # Start adding the sub-element
         cov_sub = ET.SubElement(main, "TemporalCoverage")
         # [1] start year
-        add_element("1", cov_this, "StartYear", cov_sub, field_name="startYear")
+        add_element("1", cov_this, "startYear", cov_sub, field_name="startYear")
         # [1] end year
-        add_element("1", cov_this, "EndYear", cov_sub, field_name="endYear")
+        add_element("1", cov_this, "endYear", cov_sub, field_name="endYear")
     # [0-n] Spatial coverage
     for cov_this in item_this.spatialcoverages.all():
         # Start adding the sub-element
@@ -206,13 +206,13 @@ def add_descriptor_xml(item_this, main):
     # annotation (0-n)
     for ann_this in item_this.annotations.all(): 
         # Add this annotation element
-        ann = ET.SubElement(main, "annotation")
+        ann = ET.SubElement(main, "Annotation")
         # [1]   type
-        add_element("1", ann_this, "type", ann, fieldchoice=ANNOTATION_TYPE)
+        add_element("1", ann_this, "AnnotationType", ann, fieldchoice=ANNOTATION_TYPE, field_name="type")
         # [0-1] mode
-        add_element("0-1", ann_this, "mode", ann, fieldchoice=ANNOTATION_MODE)
+        add_element("0-1", ann_this, "AnnotationMode", ann, fieldchoice=ANNOTATION_MODE, field_name="mode")
         # [0-1] format
-        add_element("0-1", ann_this, "format", ann, fieldchoice=ANNOTATION_FORMAT)
+        add_element("0-1", ann_this, "AnnotationFormat", ann, fieldchoice=ANNOTATION_FORMAT, field_name="format")
 
 
 def get_country(cntryCode):

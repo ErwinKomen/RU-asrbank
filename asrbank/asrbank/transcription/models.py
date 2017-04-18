@@ -16,6 +16,9 @@ import sys
 MAX_IDENTIFIER_LEN = 10
 MAX_STRING_LEN = 255
 
+DESCRIPTOR_ACCESS = "descriptor.access"
+DESCRIPTOR_OWNER = "descriptor.owner"
+DESCRIPTOR_IDENTIFIER = "descriptor.identifier"
 PROJECT_TITLE = "project.title"
 INTERVIEW_ID = "interview.id"
 INTERVIEW_DATE = "interview.date"
@@ -58,10 +61,16 @@ class FieldChoice(models.Model):
 class HelpChoice(models.Model):
     """Define the URL to link to for the help-text"""
     
-    field = models.CharField(max_length=200)        # The 'path' to and including the actual field
-    searchable = models.BooleanField(default=False) # Whether this field is searchable or not
-    display_name = models.CharField(max_length=50)  # Name between the <a></a> tags
-    help_url = models.URLField(default='')          # THe actual help url (if any)
+    # [1]   The 'path' to and including the actual field
+    field = models.CharField(max_length=200)        
+    # [1]   Whether this field is searchable or not
+    searchable = models.BooleanField(default=False) 
+    # [1]   Name between the <a></a> tags
+    display_name = models.CharField(max_length=50)  
+    # [0-1] THe actual help url (if any)
+    help_url = models.URLField(default='', blank=True, null=True)  
+    # [0-1] The help message (if there is no URL)
+    help_msg = models.CharField(max_length=MAX_STRING_LEN, default='', blank=True, null=True)        
 
     def __str__(self):
         return "[{}]: {}".format(
@@ -70,7 +79,13 @@ class HelpChoice(models.Model):
     def Text(self):
         help_text = ''
         # is anything available??
-        if (self.help_url != ''):
+        if (self.help_url == ''):
+            if self.help_msg == '':
+                help_text = "(no help available for {})".format(self.display_name)
+            else:
+                help_text = "({})".format(
+                        self.help_msg)
+        else:
             if self.help_url[:4] == 'http':
                 help_text = "See: <a href='{}'>{}</a>".format(
                     self.help_url, self.display_name)
@@ -78,6 +93,12 @@ class HelpChoice(models.Model):
                 help_text = "{} ({})".format(
                     self.display_name, self.help_url)
         return help_text
+
+    def has_url(self):
+        if self.help_url == None or self.help_url == "":
+            return False
+        else:
+            return True
 
 
 def build_choice_list(field, position=None, subcat=None, maybe_empty=False):
@@ -355,11 +376,11 @@ class Annotation(models.Model):
 
     def __str__(self):
         idt = self.descriptor.identifier
-        sType = choice_english(self.type)
+        sType = choice_english(ANNOTATION_TYPE, self.type)
         sMode = "-"
         sFormat = "-"
-        if self.mode == None: sMode = choice_english(self.mode)
-        if self.format == None: sFormat = choice_english(self.format)
+        if self.mode == None: sMode = choice_english(ANNOTATION_MODE, self.mode)
+        if self.format == None: sFormat = choice_english(ANNOTATION_FORMAT, self.format)
         return "[{}] {}-{}-{}".format(idt, sType, sMode, sFormat)
 
 
@@ -384,10 +405,15 @@ class Descriptor(models.Model):
     """Description of the metadata of one OH transcription"""
 
     # INTERNAL FIELD: identifier (1)
-    identifier = models.CharField("Unique short descriptor identifier (10 characters max)", max_length=MAX_IDENTIFIER_LEN, default='-')
+    identifier = models.CharField("Unique short descriptor identifier (10 characters max)", 
+                                  max_length=MAX_IDENTIFIER_LEN, default='-', help_text=get_help(DESCRIPTOR_IDENTIFIER))
 
     # INTERNAL FIELD: Owner of this descriptor (1)
-    owner = models.ForeignKey(User, blank=False, null=False)
+    owner = models.ForeignKey(User, blank=False, null=False, help_text=get_help(DESCRIPTOR_OWNER))
+
+    # INTERNAL FIELD: who has access to this particular record? (1)
+    access = models.CharField("Access to this record", choices=build_choice_list(DESCRIPTOR_ACCESS), max_length=5, 
+                            help_text=get_help(DESCRIPTOR_ACCESS), default='0')
 
     # ------------ ADMINISTRATIVE --------------
     # [1] Project title
@@ -422,9 +448,16 @@ class Descriptor(models.Model):
     # [0-n] Annotations
     # [0-n] Anonymisation levels
 
+    class Meta:
+        verbose_name = "metadata record"
+
 
     def __str__(self):
         return self.identifier
+
+    def identifier_column(self):
+        return self.identifier
+    identifier_column.short_description = "identifier"
 
     @classmethod
     def create(cls, **kwargs):

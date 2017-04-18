@@ -221,11 +221,15 @@ class DescriptorAdminForm(forms.ModelForm):
 
     class Meta:
         model = Descriptor
-        fields = ['identifier','projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality']
+        fields = ['identifier', 'access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality']
 
     def __init__(self, *args, **kwargs):
         super(DescriptorAdminForm, self).__init__(*args, **kwargs)
+        # Initialize FieldChoice fields on the main page
         init_choices(self, 'modality', INTERVIEW_MODALITY)
+        init_choices(self, 'access', DESCRIPTOR_ACCESS)
+        # Set the initial/default value for some fields
         self.fields['modality'].initial = choice_value(INTERVIEW_MODALITY, "spoken")
+        self.fields['access'].initial = choice_value(DESCRIPTOR_ACCESS, "just me")
 
 
