@@ -50,6 +50,16 @@ fieldset fieldset table th span {
 }
 .required-star {
   color: red;
+  display: inline-block;
+  margin-right: 3px;
+}
+.related-widget-wrapper {
+  float: none;
+  display: inline-block;
+}
+
+.aligned label.required {
+  width: 150px;
 }
 
 input.input-validation-error {

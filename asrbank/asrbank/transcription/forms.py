@@ -7,6 +7,9 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+
 import re       # Regular expession for validation
 
 from asrbank.transcription.models import *
@@ -38,6 +41,33 @@ def validate_year(value):
             return 'The year must be a positive number'
     return ""
 
+def add_required_label_tag(original_function):
+    """Adds the 'required' CSS class and an asterisks to required field labels."""
+
+    def required_label_tag(self, contents=None, attrs=None, label_suffix=None):
+        contents = contents or escape(self.label)
+        asterisk = ""
+        if self.field.required:
+            #if not self.label.endswith(" *"):
+            #    self.label += " *"
+            #    contents += " *"
+            #attrs = {'class': 'required'}
+            asterisk = "<span class=\"required-star\">*</span>"
+            # asterisk = ""
+        # sBack ="{}\n{}".format(original_function(self, contents, attrs, label_suffix), asterisk)
+        bk = original_function(self, contents, attrs)
+        sBack =mark_safe("{}\n{}".format(bk, asterisk))
+        return sBack
+    return required_label_tag
+
+def decorate_bound_field():
+    """Override the [label_tag()] function for Bound fields"""
+
+    from django.forms.forms import BoundField
+    BoundField.label_tag = add_required_label_tag(BoundField.label_tag)
+
+# Call the above
+decorate_bound_field()
 
 class BootstrapAuthenticationForm(AuthenticationForm):
     """Authentication form which uses boostrap CSS."""
@@ -231,5 +261,6 @@ class DescriptorAdminForm(forms.ModelForm):
         # Set the initial/default value for some fields
         self.fields['modality'].initial = choice_value(INTERVIEW_MODALITY, "spoken")
         self.fields['access'].initial = choice_value(DESCRIPTOR_ACCESS, "just me")
+
 
 
