@@ -48,15 +48,11 @@ def add_required_label_tag(original_function):
         contents = contents or escape(self.label)
         asterisk = ""
         if self.field.required:
-            #if not self.label.endswith(" *"):
-            #    self.label += " *"
-            #    contents += " *"
-            #attrs = {'class': 'required'}
             asterisk = "<span class=\"required-star\">*</span>"
-            # asterisk = ""
-        # sBack ="{}\n{}".format(original_function(self, contents, attrs, label_suffix), asterisk)
-        bk = original_function(self, contents, attrs)
-        sBack =mark_safe("{}\n{}".format(bk, asterisk))
+        # Get the original <label> creation
+        bk = original_function(self, contents, attrs, label_suffix)
+        # Combine this using the mark_safe() function
+        sBack = mark_safe("{}\n{}".format(bk, asterisk))
         return sBack
     return required_label_tag
 
