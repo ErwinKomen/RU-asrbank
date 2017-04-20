@@ -33,16 +33,17 @@ div.breadcrumbs {
 /* Nested fieldset headings */
 fieldset fieldset h2 {
   background-color: lightblue !important;
-  color: darkblue !important;
+  color: black !important; /* */
   text-transform: none !important;
   /* Last resort: don't display the heading at all */
-  display: none;
+  /* display: none; /* */
 }
 /* Nested fieldset field names */
 fieldset fieldset table th.required {
   /* font-weight: bold; /* */
   /* color: #666; /* */
   /* text-transform: capitalize;  /* */
+  text-transform: none;
   font-size: 13px;
 }
 fieldset fieldset table th span {

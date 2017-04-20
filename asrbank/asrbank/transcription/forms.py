@@ -21,7 +21,6 @@ def init_choices(obj, sFieldName, sSet, maybe_empty=False):
         obj.fields[sFieldName].choices = build_choice_list(sSet, maybe_empty=maybe_empty)
         obj.fields[sFieldName].help_text = get_help(sSet)
 
-
 def validate_year(value):
     if value == None or value == "":
         return 'Please specify a year'
@@ -105,7 +104,7 @@ class FileFormatAdminForm(forms.ModelForm):
     class Meta:
         model = FileFormat
         fields = ['name']
-        widgets = { 'name': forms.Select(attrs={'width': 30}) }
+        widgets = { 'name': forms.Select(attrs={'width': 30, 'simple': True}) }
 
     def __init__(self, *args, **kwargs):
         super(FileFormatAdminForm, self).__init__(*args, **kwargs)
@@ -118,7 +117,7 @@ class AvailabilityAdminForm(forms.ModelForm):
     class Meta:
         model = Availability
         fields = ['name']
-        widgets = { 'name': forms.Select(attrs={'width': 30}) }
+        widgets = { 'name': forms.Select(attrs={'width': 30, 'simple': True}) }
 
     def __init__(self, *args, **kwargs):
         super(AvailabilityAdminForm, self).__init__(*args, **kwargs)
@@ -163,8 +162,8 @@ class TemporalCoverageAdminForm(forms.ModelForm):
     class Meta:
         model = TemporalCoverage
         fields = ['startYear', 'endYear']
-        widgets = {'startYear': forms.Textarea(attrs={'rows': 1, 'cols': 20}),
-                   'endYear': forms.Textarea(attrs={'rows': 1, 'cols': 20})}
+        widgets = {'startYear': forms.Textarea(attrs={'rows': 1, 'cols': 20, 'simple': True}),
+                   'endYear': forms.Textarea(attrs={'rows': 1, 'cols': 20, 'simple': True})}
 
     def clean(self):
         cleaned_data = super(TemporalCoverageAdminForm, self).clean()
@@ -189,7 +188,7 @@ class SpatialCoverageAdminForm(forms.ModelForm):
     class Meta:
         model = SpatialCoverage
         fields = ['country', 'place']
-        widgets = {'country': forms.Select(attrs={'width': 30}),
+        widgets = {'country': forms.Select(attrs={'width': 30, 'simple': True}),
                    'place': forms.Textarea(attrs={'rows': 1, 'cols': 80})  }
 
     def __init__(self, *args, **kwargs):
@@ -248,6 +247,10 @@ class DescriptorAdminForm(forms.ModelForm):
     class Meta:
         model = Descriptor
         fields = ['identifier', 'access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality']
+        # Hide the 'copyright' field: https://code.djangoproject.com/ticket/22137
+        widgets = {
+            'copyright': forms.TextInput(attrs={'type': 'hidden'})
+            }
 
     def __init__(self, *args, **kwargs):
         super(DescriptorAdminForm, self).__init__(*args, **kwargs)

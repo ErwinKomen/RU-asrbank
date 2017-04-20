@@ -145,7 +145,10 @@ class IntervieweeInline(admin.TabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
-    insert_after = 'copyright'
+    # Use 'copyright' when it is visible
+    # insert_after = 'copyright'
+    # Use 'interviewLength' otherwise
+    insert_after = 'interviewLength'
 
 
 class InterviewerInline(admin.TabularInline):
@@ -156,7 +159,10 @@ class InterviewerInline(admin.TabularInline):
     # Define scope: [1-n]
     extra = 0
     min_num = 1
-    insert_after = 'copyright'
+    # Use 'copyright' when it is visible
+    # insert_after = 'copyright'
+    # Use 'interviewLength' otherwise
+    insert_after = 'interviewLength'
 
 
 class TemporalCoverageInline(admin.TabularInline):

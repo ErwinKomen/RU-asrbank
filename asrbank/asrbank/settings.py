@@ -29,6 +29,7 @@ elif "/scratch" in WRITABLE_DIR:
     admin.site.site_url = "/oh-metadataregistry"
 
 XSD_NAME = "OHmetaDescriptor.xsd.txt"
+TAR_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "asrbank/xml"))
 
 
 # Quick-start development settings - unsuitable for production

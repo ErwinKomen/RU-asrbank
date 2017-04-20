@@ -87,7 +87,7 @@ class HelpChoice(models.Model):
                         self.help_msg)
         else:
             if self.help_url[:4] == 'http':
-                help_text = "See: <a href='{}'>{}</a>".format(
+                help_text = "See: <a href='{}' target='_blank'>{}</a>".format(
                     self.help_url, self.display_name)
             else:
                 help_text = "{} ({})".format(
@@ -230,7 +230,7 @@ class Language(models.Model):
 class FileFormat(models.Model):
     """Format of an audio/video file"""
 
-    # [1] Each language has a name
+    # [1] File format language has a name
     name = models.CharField("Format of audio/video file", choices=build_choice_list(AUDIOVIDEO_FORMAT), max_length=5, 
                             help_text=get_help(AUDIOVIDEO_FORMAT), default='0')
     # [1]     Each descriptor can have [0-n] file formats associated with it
@@ -310,10 +310,10 @@ class TemporalCoverage(models.Model):
         verbose_name_plural = "Spatial coverages"
 
     # == Start year: yyyy
-    startYear = models.CharField("First year covered by the transcription", max_length=20, 
+    startYear = models.CharField("First year covered by the interview", max_length=20, 
                                help_text="Please use the following format: <em>YYYY</em>.")
     # == End year: yyyy
-    endYear = models.CharField("Last year covered by the transcription", max_length=20,
+    endYear = models.CharField("Last year covered by the interview", max_length=20,
                                help_text="Please use the following format: <em>YYYY</em>.")
     # [1]     Each descriptor can have [0-n] spatial coverages associated with it
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="temporalcoverages")
@@ -331,7 +331,7 @@ class SpatialCoverage(models.Model):
         verbose_name_plural = "Spatial coverages"
 
     # == country (0-1;c) (name+ISO-3166 code)
-    country = models.CharField("Country included in this spatial coverage", 
+    country = models.CharField("Spatial coverage: Country", 
                                choices=build_choice_list(COVERAGE_SPATIAL_COUNTRY, maybe_empty=True), 
                                max_length=5, help_text=get_help(COVERAGE_SPATIAL_COUNTRY), default='0')
     # [0-1] place
@@ -437,7 +437,7 @@ class Descriptor(models.Model):
     # [1-n]  - Interviewer
 
     # [0-1]  - Topic list
-    topicList =  models.TextField("List of topics for this transcription", blank=True, help_text=get_help(TOPICLIST))
+    topicList =  models.TextField("List of topics for this interview", blank=True, help_text=get_help(TOPICLIST))
     # [0-n; YYYY-YYYY]     - Temporal coverages
     # [0-n; Country;Place] - Spatial coverages
     # [1-n; closed]        - Genres

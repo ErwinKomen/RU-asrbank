@@ -11,6 +11,8 @@ from django.contrib.admin.templatetags.admin_list import result_headers
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
+from wsgiref import util
+from wsgiref.util import FileWrapper
 from django.db.models.functions import Lower
 from django.db.models import Q
 from django.utils import timezone
@@ -20,8 +22,12 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from lxml import etree
 import os
+import tarfile
+import zipfile
+import tempfile
+import io
 
-from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES
+from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES, TAR_DIR
 from asrbank.transcription.models import *
 from asrbank.transcription.forms import *
 
@@ -128,8 +134,10 @@ def add_descriptor_xml(item_this, main):
     # [0-n] Availability
     add_element("0-n", item_this, "Availability", main, 
                 field_name="availabilities", foreign="name", fieldchoice=AVAILABILITY)
-    # [0-1] Copyright description
-    add_element("0-1", item_this, "Copyright", main, field_name="copyright")
+    # ============ REMOVED ===============
+    # # [0-1] Copyright description
+    # add_element("0-1", item_this, "Copyright", main, field_name="copyright")
+    # ====================================
     # [0-1] Topic list
     add_element("0-1", item_this, "TopicList", main, field_name="topicList")
     # [1-n] Genre
@@ -190,6 +198,8 @@ def add_descriptor_xml(item_this, main):
     for cov_this in item_this.spatialcoverages.all():
         # Start adding the sub-element
         cov_sub = ET.SubElement(main, "SpatialCoverage")
+        # [0-1] place (=city)
+        add_element("0-1", cov_this, "Place", cov_sub, field_name="place")
         # country (0-1)
         cntry = cov_this.country
         if cntry != None:
@@ -201,8 +211,6 @@ def add_descriptor_xml(item_this, main):
             cntMainCoding = ET.SubElement(cntMain, "CountryCoding")
             cntMainName.text = sEnglish
             cntMainCoding.text = sAlpha2
-        # [0-1] place (=city)
-        add_element("0-1", cov_this, "Place", cov_sub, field_name="place")
     # annotation (0-n)
     for ann_this in item_this.annotations.all(): 
         # Add this annotation element
@@ -213,6 +221,36 @@ def add_descriptor_xml(item_this, main):
         add_element("0-1", ann_this, "AnnotationMode", ann, fieldchoice=ANNOTATION_MODE, field_name="mode")
         # [0-1] format
         add_element("0-1", ann_this, "AnnotationFormat", ann, fieldchoice=ANNOTATION_FORMAT, field_name="format")
+
+def create_descriptor_xml(descriptor_this):
+    """Convert the 'descriptor' object from the context to XML
+    
+    Note: the returns a TUPLE of a boolean and a string
+    """
+
+    # Create a top-level element, including CMD, Header and Resources
+    top = make_descriptor_top()
+
+    # Start components and this collection component
+    cmp = ET.SubElement(top, "Components")
+
+    # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
+    descrroot = ET.SubElement(cmp, "OHmetaDescriptor")
+
+    # Add this collection to the xml
+    add_descriptor_xml(descriptor_this, descrroot)
+
+    # Convert the XML to a string
+    xmlstr = minidom.parseString(ET.tostring(top,encoding='utf-8')).toprettyxml(indent="  ")
+
+    # Validate the XML against the XSD
+    (bValid, oError) = validateXml(xmlstr)
+    if not bValid:
+        # Get error messages for all the errors
+        return (False, xsd_error_list(oError, xmlstr))
+
+    # Return this string
+    return (True, xmlstr)
 
 
 def get_country(cntryCode):
@@ -396,8 +434,10 @@ class DescriptorListView(ListView):
     def render_to_response(self, context, **response_kwargs):
         """Check if downloading is needed or not"""
         sType = self.request.GET.get('submit_type', '')
-        if sType == 'xml':
-            return self.download_to_xml(context)
+        if sType == 'tar':
+            return self.download_to_tar(context)
+        elif sType == 'zip':
+            return self.download_to_zip(context)
         else:
             return super(DescriptorListView, self).render_to_response(context, **response_kwargs)
 
@@ -441,49 +481,65 @@ class DescriptorListView(ListView):
         # Return the calculated context
         return context
 
-    def convert_to_xml(self, context):
-        """Convert all available descriptors to XML"""
+    def download_to_tar(self, context):
+        """Make the XML representation of ALL descriptors downloadable as a tar.gz"""
 
-        # Create a top-level element, including CMD, Header and Resources
-        top = make_descriptor_top()
+        # Get the overview list
+        qs = context['overview_list']
+        if len(qs) > 0:
+            out = io.BytesIO()
+            # Combine the files
+            with tarfile.open(fileobj=out, mode="w:gz") as tar:
+                for descr_this in qs:
+                    # Get the XML text of this object
+                    (bValid, sXmlText) = create_descriptor_xml(descr_this)
+                    if bValid:
+                        sEnc = sXmlText.encode('utf-8')
+                        bData = io.BytesIO(sEnc)
+                        # sData = io.StringIO(sXmlText)
 
-        # Start components and this collection component
-        cmp     = ET.SubElement(top, "Components")
-        # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
-        colroot = ET.SubElement(cmp, "OHmetaDescriptor")
+                        info = tarfile.TarInfo(name=descr_this.identifier + ".xml")
+                        info.size = len(sEnc)
+                        tar.addfile(tarinfo=info, fileobj=bData)
 
-        # Walk all the collections
-        for col_this in Descriptor.objects.all():
-
-            # Add a <collection> root for this collection
-            crp = ET.SubElement(colroot, "collection")
-            # Add the information in this collection to the xml
-            add_collection_xml(col_this, crp)
-
-        # Convert the XML to a string
-        xmlstr = minidom.parseString(ET.tostring(top,encoding='utf-8')).toprettyxml(indent="  ")
-
-        # Validate the XML against the XSD
-        (bValid, oError) = validateXml(xmlstr)
-        if not bValid:
-            # Provide an error message
-            return (False, xsd_error_list(oError, xmlstr))
-
-        # Return this string
-        return (True, xmlstr)
-    
-    def download_to_xml(self, context):
-        """Make the XML representation of ALL descriptors downloadable"""
-
-        # Get the XML of this collection
-        (bValid, sXmlStr) = self.convert_to_xml(context)
-        if bValid:
-            # Create the HttpResponse object with the appropriate CSV header.
-            response = HttpResponse(sXmlStr, content_type='text/xml')
-            response['Content-Disposition'] = 'attachment; filename="ohmeta_all.xml"'
+            # Create the HttpResponse object with the appropriate header.
+            response = HttpResponse(out.getvalue(), content_type='application/x-gzip')
+            response['Content-Disposition'] = 'attachment; filename="ohmeta_all.tar.gz"'
         else:
             # Return the error response
-            response = HttpResponse(sXmlStr)
+            response = HttpResponse("The overview list is empty")
+
+        # Return the result
+        return response
+
+    def download_to_zip(self, context):
+        """Make the XML representation of ALL descriptors downloadable as a .zip"""
+
+        # Get the overview list
+        qs = context['overview_list']
+        if len(qs) > 0:
+            temp = tempfile.TemporaryFile()
+            # Combine the files
+            with zipfile.ZipFile(temp, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+                for descr_this in qs:
+                    # Get the XML text of this object
+                    (bValid, sXmlText) = create_descriptor_xml(descr_this)
+                    if bValid:
+                        archive.writestr(descr_this.identifier + ".xml", sXmlText)
+                # Do some checking
+                x = 1
+            # Get file information
+            iLength = temp.tell()
+            temp.seek(0)
+            # Use a wrapper to chunk-send it
+            wrapper = FileWrapper(temp)
+            # Create the HttpResponse object with the appropriate header.
+            response = HttpResponse(wrapper, content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename="ohmeta_all.zip"'
+            response['Content-Length'] = iLength
+        else:
+            # Return the error response
+            response = HttpResponse("The overview list is empty")
 
         # Return the result
         return response
@@ -536,8 +592,10 @@ class DescriptorDetailView(DetailView):
         else:
             return super(DescriptorDetailView, self).render_to_response(context, **response_kwargs)
         
-    def convert_to_xml(self, context):
+    def convert_to_xml(self, descriptor_this):
         """Convert the 'descriptor' object from the context to XML"""
+
+        # OLD: def convert_to_xml(self, context):
 
         # Create a top-level element, including CMD, Header and Resources
         top = make_descriptor_top()
@@ -548,7 +606,7 @@ class DescriptorDetailView(DetailView):
         descrroot = ET.SubElement(cmp, "OHmetaDescriptor")
 
         # Access this particular collection
-        descriptor_this = context['descriptor']
+        # descriptor_this = context['descriptor']
 
         # Add this collection to the xml
         add_descriptor_xml(descriptor_this, descrroot)
@@ -573,7 +631,8 @@ class DescriptorDetailView(DetailView):
         itemThis = self.instance
         sFileName = 'oh-descriptor-{}'.format(getattr(itemThis, 'identifier'))
         # Get the XML of this collection
-        (bValid, sXmlStr) = self.convert_to_xml(context)
+        # OLD: (bValid, sXmlStr) = self.convert_to_xml(context)
+        (bValid, sXmlStr) = create_descriptor_xml(context['descriptor'])
         if bValid:
             # Create the HttpResponse object with the appropriate CSV header.
             response = HttpResponse(sXmlStr, content_type='text/xml')
