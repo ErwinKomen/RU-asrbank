@@ -391,7 +391,7 @@ class Anonymisation(models.Model):
         verbose_name_plural = "Anonymisation levels"
 
     # (1; c)
-    name = models.CharField("Anonymisation level of the transcription", choices=build_choice_list(ANONYMISATION), max_length=5, 
+    name = models.CharField("Anonymisation level", choices=build_choice_list(ANONYMISATION), max_length=5, 
                             help_text=get_help(ANONYMISATION), default='0')
     # [1]     Each descriptor can have [0-n] anonymisation levels
     descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="anonymisations")
