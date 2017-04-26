@@ -197,6 +197,14 @@ class SpatialCoverageAdminForm(forms.ModelForm):
         self.fields['country'].initial = '0'
 
 
+class TopicAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Topic
+        fields = ['name']
+        widgets = { 'name': forms.Textarea(attrs={'rows': 1, 'cols': 80, 'simple': True}) }
+
+
 class GenreAdminForm(forms.ModelForm):
 
     class Meta:
@@ -246,7 +254,7 @@ class DescriptorAdminForm(forms.ModelForm):
 
     class Meta:
         model = Descriptor
-        fields = ['identifier', 'access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality']
+        fields = ['identifier', 'access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','modality']
         # Hide the 'copyright' field: https://code.djangoproject.com/ticket/22137
         widgets = {
             'copyright': forms.TextInput(attrs={'type': 'hidden'})

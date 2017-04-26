@@ -165,6 +165,17 @@ class InterviewerInline(admin.TabularInline):
     insert_after = 'interviewLength'
 
 
+class TopicInline(admin.TabularInline):
+    model = Topic
+    form = TopicAdminForm
+    verbose_name = "Topic"
+    verbose_name_plural = "Topic list"
+    # Define scope: [0-n]
+    extra = 0
+    validate_min = True
+    insert_after = "interviewLength"
+
+
 class TemporalCoverageInline(admin.TabularInline):
     model = TemporalCoverage
     form = TemporalCoverageAdminForm
@@ -172,7 +183,7 @@ class TemporalCoverageInline(admin.TabularInline):
     verbose_name_plural = "Temporal coverages"
     # Define scope: [0-n]
     extra = 0
-    insert_after = "topicList"
+    insert_after = "interviewLength"
 
 
 class SpatialCoverageInline(admin.TabularInline):
@@ -182,7 +193,7 @@ class SpatialCoverageInline(admin.TabularInline):
     verbose_name_plural = "Spatial coverages"
     # Define scope: [0-n]
     extra = 0
-    insert_after = "topicList"
+    insert_after = "interviewLength"
 
 
 class GenreInline(admin.TabularInline):
@@ -194,7 +205,7 @@ class GenreInline(admin.TabularInline):
     extra = 0
     min_num = 1
     validate_min = True
-    insert_after = "topicList"
+    insert_after = "interviewLength"
 
 
 class AnnotationInline(admin.TabularInline):
@@ -223,7 +234,7 @@ class DescriptorAdmin(admin.ModelAdmin):
     form = DescriptorAdminForm
 
     # Define the fields preliminarily -- full definition is done in [get_form()]
-    fields = ('identifier','access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright','topicList', 'modality',)
+    fields = ('identifier','access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', 'modality',)
 
     # Note: the 'owner' can only be changed by the administrator
     #       (This statement depends on the user-status: exclude = ['owner']  )
@@ -232,7 +243,7 @@ class DescriptorAdmin(admin.ModelAdmin):
     search_fields = ['identifier', 'owner', 'projectTitle']
     list_filter = ['access']
 
-    inlines = [LanguageInline, FileFormatInline, AvailabilityInline,
+    inlines = [TopicInline, LanguageInline, FileFormatInline, AvailabilityInline,
                IntervieweeInline, InterviewerInline,
                TemporalCoverageInline, SpatialCoverageInline,
                GenreInline, AnnotationInline, AnonymisationInline]
@@ -253,13 +264,13 @@ class DescriptorAdmin(admin.ModelAdmin):
             self.exclude = []
             self.fieldsets  = ( ('System', {'fields': ('identifier', 'owner','access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
-                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
+                  ('Descriptive',    {'fields': ('modality', )}),
                 )
         else:
             self.exclude = ['owner']
             self.fieldsets  = ( ('System', {'fields': ('identifier', 'access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
-                  ('Descriptive',    {'fields': ('topicList', 'modality', )}),
+                  ('Descriptive',    {'fields': ('modality', )}),
                 )
         # Continue with regular form-loading
         form = super(DescriptorAdmin, self).get_form(request, obj, **kwargs)

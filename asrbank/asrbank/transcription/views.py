@@ -137,9 +137,7 @@ def add_descriptor_xml(item_this, main):
     # ============ REMOVED ===============
     # # [0-1] Copyright description
     # add_element("0-1", item_this, "Copyright", main, field_name="copyright")
-    # ====================================
-    # [0-1] Topic list
-    add_element("0-1", item_this, "TopicList", main, field_name="topicList")
+    # ------------------------------------
     # [1-n] Genre
     add_element("1-n", item_this, "Genre", main, 
                 field_name="genres", foreign="name", fieldchoice=INTERVIEW_GENRE)
@@ -149,6 +147,11 @@ def add_descriptor_xml(item_this, main):
     add_element("0-n", item_this, "Anonymisation", main, 
                 field_name="anonymisations", foreign="name", fieldchoice=ANONYMISATION)
     # ==============================================================================
+    # [0-1] Topic list
+    if item_this.topics.count() > 0:
+        topList = ET.SubElement(main, "TopicList")
+        add_element("0-n", item_this, "Topic", topList, 
+                    field_name="topics", foreign="name")
     # [1-n] Language of the transcription
     for lng_this in item_this.languages.all():
         (sLngName, sLngCode) = get_language(lng_this.name)
@@ -234,8 +237,8 @@ def create_descriptor_xml(descriptor_this):
     # Start components and this collection component
     cmp = ET.SubElement(top, "Components")
 
-    # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
-    descrroot = ET.SubElement(cmp, "OHmetaDescriptor")
+    # Add a <OralHistoryInterview> root that contains a list of <collection> objects
+    descrroot = ET.SubElement(cmp, "OralHistoryInterview")
 
     # Add this collection to the xml
     add_descriptor_xml(descriptor_this, descrroot)
@@ -602,8 +605,8 @@ class DescriptorDetailView(DetailView):
 
         # Start components and this collection component
         cmp = ET.SubElement(top, "Components")
-        # Add a <OHmetaDescriptor> root that contains a list of <collection> objects
-        descrroot = ET.SubElement(cmp, "OHmetaDescriptor")
+        # Add a <OralHistoryInterview> root that contains a list of <collection> objects
+        descrroot = ET.SubElement(cmp, "OralHistoryInterview")
 
         # Access this particular collection
         # descriptor_this = context['descriptor']

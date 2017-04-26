@@ -401,6 +401,22 @@ class Anonymisation(models.Model):
         return "[{}] {}".format(idt,choice_english(ANONYMISATION, self.name))
 
 
+class Topic(models.Model):
+    """One topic of the interview/transcription"""
+
+    class Meta:
+        verbose_name_plural = "Topics"
+
+    # [1]
+    name = models.CharField("Topic",  max_length=MAX_STRING_LEN, help_text=get_help(TOPICLIST))
+    # [1] Each descriptor can have [0-n] topics
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="topics")
+
+    def __str__(self):
+        return self.name
+
+
+
 class Descriptor(models.Model):
     """Description of the metadata of one OH transcription"""
 
@@ -436,8 +452,10 @@ class Descriptor(models.Model):
     # [1-n]  - Interviewee
     # [1-n]  - Interviewer
 
-    # [0-1]  - Topic list
-    topicList =  models.TextField("List of topics for this interview", blank=True, help_text=get_help(TOPICLIST))
+    # [0-1]  - Topic list: OLD
+    # topicList =  models.TextField("List of topics for this interview", blank=True, help_text=get_help(TOPICLIST))
+    # ---- NEW: use the following ---
+    # [0-n]  - Topic list
     # [0-n; YYYY-YYYY]     - Temporal coverages
     # [0-n; Country;Place] - Spatial coverages
     # [1-n; closed]        - Genres

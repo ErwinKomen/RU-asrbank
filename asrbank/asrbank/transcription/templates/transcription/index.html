@@ -4,9 +4,10 @@
 
 <div class="jumbotron">
     <h1>OH-Metadata Registry</h1>
-    <p class="lead">The Radboud University Oral History Metadata Registry provides an interface to list, correct and add metadata specifications for Oral History transcriptions. 
-    Each OH metadata item contains administrative and descriptive information on the ASR transcription.
-    The description of an OH metadata item is defined by the Clarin Component Registry.</p>
+    <p class="lead">The Radboud University Oral History Metadata Registry provides an interface to list, 
+  correct and add metadata specifications for Oral History recordings. 
+  Each OH metadata item contains administrative and descriptive information about a specific recording (typically an interview). 
+  The description of an OH metadata item is defined by the Clarin Component Registry.</p>
     <p><a href="https://catalog.clarin.eu/ds/ComponentRegistry" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
 </div>
 
@@ -16,7 +17,7 @@
         <p>
           The OH-Metadata Registry has been designed by the Technical Service Group of the Humanities Lab at the Radboud University Nijmegen.
           Any researcher is invited to registrate (create an account) and maintain his or her own collection of OH metadata.
-          Collections of one researcher are <i>not</i> visible to other researchers.
+          Collections of one researcher are by default <i>not</i> visible to other researchers, but it is possible to specify a different accessibility level.
         </p>
         <p>
           {% if user.is_authenticated %}
