@@ -489,7 +489,7 @@ class DescriptorListView(ListView):
 
         # Get the overview list
         qs = context['overview_list']
-        if len(qs) > 0:
+        if qs != None and len(qs) > 0:
             out = io.BytesIO()
             # Combine the files
             with tarfile.open(fileobj=out, mode="w:gz") as tar:
@@ -510,7 +510,7 @@ class DescriptorListView(ListView):
             response['Content-Disposition'] = 'attachment; filename="ohmeta_all.tar.gz"'
         else:
             # Return the error response
-            response = HttpResponse("The overview list is empty")
+            response = HttpResponse("<div>The overview list is empty</div><div><a href=\"/"+APP_PREFIX+"\">Back</a></div>")
 
         # Return the result
         return response
@@ -520,7 +520,7 @@ class DescriptorListView(ListView):
 
         # Get the overview list
         qs = context['overview_list']
-        if len(qs) > 0:
+        if qs != None and len(qs) > 0:
             temp = tempfile.TemporaryFile()
             # Combine the files
             with zipfile.ZipFile(temp, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
@@ -542,7 +542,7 @@ class DescriptorListView(ListView):
             response['Content-Length'] = iLength
         else:
             # Return the error response
-            response = HttpResponse("The overview list is empty")
+            response = HttpResponse("<div>The overview list is empty</div><div><a href=\"/"+APP_PREFIX+"\">Back</a></div>")
 
         # Return the result
         return response

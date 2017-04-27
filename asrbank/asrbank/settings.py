@@ -28,7 +28,7 @@ elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
     admin.site.site_url = "/oh-metadataregistry"
 
-XSD_NAME = "OHmetaDescriptor.xsd.txt"
+XSD_NAME = "OralHistoryInterview.xsd.txt"
 TAR_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "asrbank/xml"))
 
 

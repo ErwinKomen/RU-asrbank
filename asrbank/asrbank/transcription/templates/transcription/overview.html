@@ -1,13 +1,13 @@
 ﻿{% extends "transcription/layout.html" %}
 
 {% block content %}
-    {% if overview_list %}
       <h3>Available metadata records</h3>
       <div id="content-main">
         <ul class="object-tools">
           <li><a class="addlink" href="/{{app_prefix }}admin/transcription/descriptor/add">Add a metadata record</a></li>
         </ul>
       </div>
+    {% if overview_list %}
       <table class="table table-hover">
         <thead>
           <tr>
