@@ -35,6 +35,7 @@ urlpatterns = [
     # Examples:
     url(r'^$', asrbank.transcription.views.home, name='home'),
     url(r'^contact$', asrbank.transcription.views.contact, name='contact'),
+    url(r'^more$', asrbank.transcription.views.more, name='more'),
     url(r'^about', asrbank.transcription.views.about, name='about'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^registry', RedirectView.as_view(url='/'+pfx+'admin/transcription/descriptor/'), name='registry'),

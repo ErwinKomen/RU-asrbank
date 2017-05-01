@@ -47,6 +47,10 @@
   <ItemGroup>
     <Folder Include="asrbank\templates\" />
     <Folder Include="asrbank\templates\admin\" />
+    <Folder Include="asrbank\templates\admin\includes\" />
+    <Folder Include="asrbank\templates\admin\edit_inline\" />
+    <Folder Include="asrbank\templates\admin\transcription\" />
+    <Folder Include="asrbank\templates\admin\transcription\descriptor\" />
     <Folder Include="asrbank\transcription\" />
     <Folder Include="asrbank\transcription\migrations\" />
     <Folder Include="asrbank\transcription\static\" />
@@ -60,7 +64,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="asrbank\templates\admin\base.html" />
+    <Content Include="asrbank\templates\admin\edit_inline\tabular.html" />
+    <Content Include="asrbank\templates\admin\includes\fieldset.html" />
+    <Content Include="asrbank\templates\admin\transcription\descriptor\change_form.html" />
     <Content Include="asrbank\transcription\static\transcription\scripts\asrbank.js" />
+    <Content Include="asrbank\transcription\templates\transcription\more.html" />
     <Content Include="asrbank\transcription\templates\transcription\overview.html" />
     <Content Include="asrbank\transcription\templates\transcription\signup.html" />
     <Content Include="asrbank\transcription\templates\transcription\topnav.html" />

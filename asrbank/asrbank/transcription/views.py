@@ -380,6 +380,18 @@ def contact(request):
         }
     )
 
+def more(request):
+    """Renders the more page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'transcription/more.html',
+        {
+            'title':'More',
+            'year':datetime.now().year,
+        }
+    )
+
 def about(request):
     """Renders the about page."""
     assert isinstance(request, HttpRequest)
