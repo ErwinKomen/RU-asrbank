@@ -112,6 +112,10 @@ def make_descriptor_top():
     lproxy = ET.SubElement(rsc, "ResourceProxyList")
     # TODO: add resource proxy's under [lproxy]
 
+    # Produce a link to the resource
+    oProxy = ET.SubElement(lproxy, "ResourceProxy")
+    oProxy.set('id', iProxyId)
+
     ET.SubElement(rsc, "JournalFileProxyList")
     ET.SubElement(rsc, "ResourceRelationList")
     # Return the resulting top-level element
