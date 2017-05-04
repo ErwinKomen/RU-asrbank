@@ -21,12 +21,17 @@ if "RU-asrbank\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
 
+# Specify the directory where the created XML files are going to be stored (persistently)
+XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
+
 APP_PREFIX = "ru/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
 elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
     admin.site.site_url = "/oh-metadataregistry"
+
+# HOME_URI = 
 
 XSD_NAME = "OralHistoryInterview.xsd.txt"
 TAR_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "asrbank/xml"))

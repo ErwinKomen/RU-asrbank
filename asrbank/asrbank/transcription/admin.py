@@ -234,7 +234,9 @@ class DescriptorAdmin(admin.ModelAdmin):
     form = DescriptorAdminForm
 
     # Define the fields preliminarily -- full definition is done in [get_form()]
-    fields = ('identifier','access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', 'modality',)
+    fields = ('identifier','pidname', 'access', 'projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', 'modality',)
+    # There is at least one readonly field
+    readonly_fields = ('pidname',)
 
     # Note: the 'owner' can only be changed by the administrator
     #       (This statement depends on the user-status: exclude = ['owner']  )
@@ -262,13 +264,13 @@ class DescriptorAdmin(admin.ModelAdmin):
 
         if request.user.is_superuser:
             self.exclude = []
-            self.fieldsets  = ( ('System', {'fields': ('identifier', 'owner','access', )}),
+            self.fieldsets  = ( ('System', {'fields': ('identifier', 'pidname','owner','access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('modality', )}),
                 )
         else:
             self.exclude = ['owner']
-            self.fieldsets  = ( ('System', {'fields': ('identifier', 'access', )}),
+            self.fieldsets  = ( ('System', {'fields': ('identifier', 'pidname','access', )}),
                   ('Administrative', {'fields': ('projectTitle', 'interviewId', 'interviewDate', 'interviewLength', 'copyright', )}),
                   ('Descriptive',    {'fields': ('modality', )}),
                 )

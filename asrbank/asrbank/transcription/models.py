@@ -431,6 +431,10 @@ class Descriptor(models.Model):
     access = models.CharField("Access to this record", choices=build_choice_list(DESCRIPTOR_ACCESS), max_length=5, 
                             help_text=get_help(DESCRIPTOR_ACCESS), default='0')
 
+    # INTERNAL FIELD: the persistent identifier name by which this descriptor is going to be recognized
+    pidname = models.CharField("Registry identifier", 
+                               max_length=MAX_STRING_LEN, default="empty")
+
     # ------------ ADMINISTRATIVE --------------
     # [1] Project title
     projectTitle = models.CharField("Project title", max_length=MAX_STRING_LEN, blank=False, 
@@ -476,6 +480,12 @@ class Descriptor(models.Model):
     def identifier_column(self):
         return self.identifier
     identifier_column.short_description = "identifier"
+
+    def get_pidname(self):
+        if self.pidname == "" or self.pidname == "empty":
+            self.pidname = "ohmetadata_{0:05d}".format(self.id)
+            self.save()
+        return self.pidname
 
     @classmethod
     def create(cls, **kwargs):

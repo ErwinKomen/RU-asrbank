@@ -1,6 +1,12 @@
 ﻿{% extends "transcription/layout.html" %}
 
 {% block content %}
+      {% if publish %}
+        <div>{{publish.status}}: 
+          <span>{{publish.written}}</span>
+          <span>{% if publish.written > 1%}records {% else %}record{% endif %}</span>
+        </div>
+      {% endif %}
       <h3>Available metadata records</h3>
       <div id="content-main">
         <ul class="object-tools">

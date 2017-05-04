@@ -21,7 +21,7 @@
                          aria-haspopup="true" aria-expanded="false">Registry<span class="caret"></span></a>
                       <ul class="dropdown-menu">
                           {% if user.is_authenticated %}
-                          <li><a href="{% url 'registry' %}">Edit</a></li>
+                          <li><a href="{% url 'editable' %}">Edit</a></li>
                           {% endif %}
                           <li><a href="{% url 'overview' %}">View</a></li>
                       </ul>
@@ -33,6 +33,7 @@
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
                          aria-haspopup="true" aria-expanded="false">Tools <span class="caret"></span></a>
                       <ul class="dropdown-menu">
+                        <li><a href="{% url 'overview' %}?submit_type=publish">Publish all</a></li>
                         <li><a href="{% url 'overview' %}?submit_type=tar">Export all as tar.gz</a></li>
                         <li><a href="{% url 'overview' %}?submit_type=zip">Export all as zip</a></li>
                       </ul>

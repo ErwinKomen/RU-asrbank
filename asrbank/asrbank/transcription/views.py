@@ -11,6 +11,8 @@ from django.contrib.admin.templatetags.admin_list import result_headers
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
+from django.core.files import File
+from django.core.urlresolvers import reverse
 from wsgiref import util
 from wsgiref.util import FileWrapper
 from django.db.models.functions import Lower
@@ -27,7 +29,7 @@ import zipfile
 import tempfile
 import io
 
-from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES, TAR_DIR
+from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES, TAR_DIR, XML_DIR
 from asrbank.transcription.models import *
 from asrbank.transcription.forms import *
 
@@ -90,7 +92,7 @@ def add_element(optionality, item_this, el_name, crp, **kwargs):
     # Return positively
     return True
     
-def make_descriptor_top():
+def make_descriptor_top(request):
     """Create the top-level elements for a descriptor"""
 
     # Define the top-level of the xml output
@@ -114,7 +116,17 @@ def make_descriptor_top():
 
     # Produce a link to the resource
     oProxy = ET.SubElement(lproxy, "ResourceProxy")
-    oProxy.set('id', iProxyId)
+    sProxyId = "oh_000000000001"
+    oProxy.set('id', sProxyId)
+    # Add resource type
+    oSubItem = ET.SubElement(oProxy, "ResourceType")
+    oSubItem.set("mimetype", "application/sru+xml")
+    oSubItem.text = "SearchService"
+    # Add resource ref
+    oSubItem = ET.SubElement(oProxy, "ResourceRef")
+    #  "http://applejack.science.ru.nl/oh-metadataregistry"
+    oSubItem.text = request.build_absolute_uri(reverse('home'))
+    
 
     ET.SubElement(rsc, "JournalFileProxyList")
     ET.SubElement(rsc, "ResourceRelationList")
@@ -229,14 +241,14 @@ def add_descriptor_xml(item_this, main):
         # [0-1] format
         add_element("0-1", ann_this, "AnnotationFormat", ann, fieldchoice=ANNOTATION_FORMAT, field_name="format")
 
-def create_descriptor_xml(descriptor_this):
+def create_descriptor_xml(descriptor_this, request):
     """Convert the 'descriptor' object from the context to XML
     
     Note: the returns a TUPLE of a boolean and a string
     """
 
     # Create a top-level element, including CMD, Header and Resources
-    top = make_descriptor_top()
+    top = make_descriptor_top(request)
 
     # Start components and this collection component
     cmp = ET.SubElement(top, "Components")
@@ -450,6 +462,27 @@ class DescriptorListView(ListView):
                    {'name': 'Project', 'order': 'o=4', 'type': 'str'}, 
                    {'name': 'Date', 'order': 'o=5', 'type': 'str'}]
 
+    #def get(self, request, *args, **kwargs):
+    #    self.object_list = self.get_queryset()
+    #    allow_empty = self.get_allow_empty()
+
+    #    if not allow_empty:
+    #        # When pagination is enabled and object_list is a queryset,
+    #        # it's better to do a cheap query than to load the unpaginated
+    #        # queryset in memory.
+    #        if self.get_paginate_by(self.object_list) is not None and hasattr(self.object_list, 'exists'):
+    #            is_empty = not self.object_list.exists()
+    #        else:
+    #            is_empty = len(self.object_list) == 0
+    #        if is_empty:
+    #            raise Http404(_("Empty list and '%(class_name)s.allow_empty' is False.") % {
+    #                'class_name': self.__class__.__name__,
+    #            })
+    #    # return render(request, self.template_name)
+    #    context = self.get_context_data()
+    #    renderedpage = self.render_to_response(context)
+    #    return renderedpage
+
     def render_to_response(self, context, **response_kwargs):
         """Check if downloading is needed or not"""
         sType = self.request.GET.get('submit_type', '')
@@ -457,6 +490,15 @@ class DescriptorListView(ListView):
             return self.download_to_tar(context)
         elif sType == 'zip':
             return self.download_to_zip(context)
+        elif sType == 'publish':
+            # Perform the publishing
+            context['publish'] = self.publish_xml(context)
+            if context['publish']['status'] == 'error':
+                sHtml = context['publish']['html']
+                return HttpResponse(sHtml)
+            else:
+                # Return a positive result
+                return super(DescriptorListView, self).render_to_response(context, **response_kwargs)
         else:
             return super(DescriptorListView, self).render_to_response(context, **response_kwargs)
 
@@ -511,7 +553,7 @@ class DescriptorListView(ListView):
             with tarfile.open(fileobj=out, mode="w:gz") as tar:
                 for descr_this in qs:
                     # Get the XML text of this object
-                    (bValid, sXmlText) = create_descriptor_xml(descr_this)
+                    (bValid, sXmlText) = create_descriptor_xml(descr_this, self.request)
                     if bValid:
                         sEnc = sXmlText.encode('utf-8')
                         bData = io.BytesIO(sEnc)
@@ -542,7 +584,7 @@ class DescriptorListView(ListView):
             with zipfile.ZipFile(temp, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
                 for descr_this in qs:
                     # Get the XML text of this object
-                    (bValid, sXmlText) = create_descriptor_xml(descr_this)
+                    (bValid, sXmlText) = create_descriptor_xml(descr_this, self.request)
                     if bValid:
                         archive.writestr(descr_this.identifier + ".xml", sXmlText)
                 # Do some checking
@@ -562,6 +604,41 @@ class DescriptorListView(ListView):
 
         # Return the result
         return response
+
+    def publish_xml(self, context):
+        """Make the XML representation of ALL descriptors downloadable as a .zip"""
+
+        # Get the overview list
+        qs = context['overview_list']
+        oBack = {'status': 'unknown', 'written': 0}
+        iWritten = 0
+        if qs != None and len(qs) > 0:
+            # Assuming all goes well
+            oBack['status'] = 'published'
+            # Walk all the descriptors in the queryset
+            for descr_this in qs:
+                # Get the XML text of this object
+                (bValid, sXmlText) = create_descriptor_xml(descr_this, self.request)
+                if bValid:
+                    # Get the correct pidname
+                    sPidName = descr_this.get_pidname() + ".xml"
+                    # THink of a filename
+                    fPublish = os.path.abspath(os.path.join(WRITABLE_DIR, "xml", sPidName))
+                    # Write it to a file in the XML directory
+                    with open(fPublish, encoding="utf-8", mode="w") as f:  
+                        f.write(sXmlText)
+                    iWritten += 1
+                else:
+                    oBack['status'] = 'error'
+                    oBack['html'] = sXmlText
+                    break
+            # Adapt the status
+            oBack['written'] = iWritten
+        else:
+            oBack['status'] = 'empty'
+
+        # Return good status
+        return oBack
 
     def get_queryset(self):
 
@@ -588,6 +665,44 @@ class DescriptorDetailView(DetailView):
     model = Descriptor
     export_xml = True
     context_object_name='descriptor'
+    slug_field = 'pidname'
+
+    def get(self, request, *args, **kwargs):
+        # Get the object in the standard way
+        self.object = self.get_object()
+        # Check what kind of output we need to give
+        if 'type' in kwargs and kwargs['type'] == 'registry':
+            bValid = True
+            try:
+                # Get the XML file and show it
+                sPidName = self.object.instance.get_pidname() + ".xml"
+                # THink of a filename
+                fPublish = os.path.abspath(os.path.join(WRITABLE_DIR, "xml", sPidName))
+                # Write it to a file in the XML directory
+                with open(fPublish, encoding="utf-8", mode="r") as f:  
+                    sXmlText = f.read()
+            except:
+                bValid = False
+                sXmlText = "Could not fetch the resource with identifier {}".format(
+                    self.object.instance.identifier)
+            if bValid:
+                # Create the HttpResponse object with the appropriate CSV header.
+                response = HttpResponse(sXmlText, content_type='text/xml')
+                # response['Content-Disposition'] = 'attachment; filename="'+sFileName+'.xml"'
+            else:
+                # Return the error response
+                response = HttpResponse(sXmlText)
+
+            # Return the result
+            return response
+        # For further processing we need to have the context
+        context = self.get_context_data(object=self.object)
+        # Is this downloading an XML?
+        if 'type' in kwargs and kwargs['type'] == 'output':
+            return self.download_to_xml(context)
+        else:
+            # Final resort: render like that
+            return self.render_to_response(context)
 
     def get_object(self):
         obj = super(DescriptorDetailView,self).get_object()
@@ -601,15 +716,15 @@ class DescriptorDetailView(DetailView):
         context['descriptor'] = self.instance
         return context
 
-    def render_to_response(self, context, **response_kwargs):
-        """Check if downloading is needed or not"""
-        sType = self.request.GET.get('submit_type', '')
-        if sType == 'xml':
-            return self.download_to_xml(context)
-        elif self.export_xml and sType != '':
-            return self.render_to_xml(context)
-        else:
-            return super(DescriptorDetailView, self).render_to_response(context, **response_kwargs)
+    #def render_to_response(self, context, **response_kwargs):
+    #    """Check if downloading is needed or not"""
+    #    sType = self.request.GET.get('submit_type', '')
+    #    if sType == 'xml':
+    #        return self.download_to_xml(context)
+    #    elif self.export_xml and sType != '':
+    #        return self.render_to_xml(context)
+    #    else:
+    #        return super(DescriptorDetailView, self).render_to_response(context, **response_kwargs)
         
     def convert_to_xml(self, descriptor_this):
         """Convert the 'descriptor' object from the context to XML"""
@@ -651,7 +766,7 @@ class DescriptorDetailView(DetailView):
         sFileName = 'oh-descriptor-{}'.format(getattr(itemThis, 'identifier'))
         # Get the XML of this collection
         # OLD: (bValid, sXmlStr) = self.convert_to_xml(context)
-        (bValid, sXmlStr) = create_descriptor_xml(context['descriptor'])
+        (bValid, sXmlStr) = create_descriptor_xml(context['descriptor'], self.request)
         if bValid:
             # Create the HttpResponse object with the appropriate CSV header.
             response = HttpResponse(sXmlStr, content_type='text/xml')
