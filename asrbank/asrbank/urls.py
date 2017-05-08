@@ -39,6 +39,7 @@ urlpatterns = [
     url(r'^about', asrbank.transcription.views.about, name='about'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^editable', RedirectView.as_view(url='/'+pfx+'admin/transcription/descriptor/'), name='editable'),
+    url(r'^descriptor/add', RedirectView.as_view(url='/'+pfx+'admin/transcription/descriptor/add'), name='add'),
     url(r'^overview/$', DescriptorListView.as_view(),{'type': 'list'}, name='overview'),
     url(r'^publish/$', DescriptorListView.as_view(), {'type': 'publish'},name='publish'),
     url(r'^output/(?P<pk>\d+)$', DescriptorDetailView.as_view(), {'type': 'output'}, name='output'),
