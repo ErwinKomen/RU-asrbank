@@ -280,7 +280,7 @@ class DescriptorAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         # Only supply owner if not specified
-        if obj.owner == None or obj.owner.is_anonymous():
+        if obj.owner_id == None or obj.owner == None or obj.owner.is_anonymous():
             obj.owner = request.user
         super(DescriptorAdmin, self).save_model(request, obj, form, change)
 
@@ -299,6 +299,9 @@ class DescriptorAdmin(admin.ModelAdmin):
         if formset.prefix == "genres" or formset.prefix == "languages":
             # Save all the genre instances
             for frmThis in formset.forms:
+                # Check the Descriptor ID
+                if frmThis.instance.descriptor_id == None:
+                    frmThis.instance.descriptor_id = frmThis.instance.descriptor.id                        
                 # Save this instance
                 frmThis.instance.save()
         for instance in instances:
