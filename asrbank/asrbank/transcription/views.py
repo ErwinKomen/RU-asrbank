@@ -726,37 +726,37 @@ class DescriptorDetailView(DetailView):
     #    else:
     #        return super(DescriptorDetailView, self).render_to_response(context, **response_kwargs)
         
-    def convert_to_xml(self, descriptor_this):
-        """Convert the 'descriptor' object from the context to XML"""
+    #def convert_to_xml(self, descriptor_this):
+    #    """Convert the 'descriptor' object from the context to XML"""
 
-        # OLD: def convert_to_xml(self, context):
+    #    # OLD: def convert_to_xml(self, context):
 
-        # Create a top-level element, including CMD, Header and Resources
-        top = make_descriptor_top()
+    #    # Create a top-level element, including CMD, Header and Resources
+    #    top = make_descriptor_top()
 
-        # Start components and this collection component
-        cmp = ET.SubElement(top, "Components")
-        # Add a <OralHistoryInterview> root that contains a list of <collection> objects
-        descrroot = ET.SubElement(cmp, "OralHistoryInterview")
+    #    # Start components and this collection component
+    #    cmp = ET.SubElement(top, "Components")
+    #    # Add a <OralHistoryInterview> root that contains a list of <collection> objects
+    #    descrroot = ET.SubElement(cmp, "OralHistoryInterview")
 
-        # Access this particular collection
-        # descriptor_this = context['descriptor']
+    #    # Access this particular collection
+    #    # descriptor_this = context['descriptor']
 
-        # Add this collection to the xml
-        add_descriptor_xml(descriptor_this, descrroot)
+    #    # Add this collection to the xml
+    #    add_descriptor_xml(descriptor_this, descrroot)
 
-        # Convert the XML to a string
-        xmlstr = minidom.parseString(ET.tostring(top,encoding='utf-8')).toprettyxml(indent="  ")
+    #    # Convert the XML to a string
+    #    xmlstr = minidom.parseString(ET.tostring(top,encoding='utf-8')).toprettyxml(indent="  ")
 
-        # Validate the XML against the XSD
-        (bValid, oError) = validateXml(xmlstr)
-        if not bValid:
-            # Get error messages for all the errors
+    #    # Validate the XML against the XSD
+    #    (bValid, oError) = validateXml(xmlstr)
+    #    if not bValid:
+    #        # Get error messages for all the errors
 
-            return (False, xsd_error_list(oError, xmlstr))
+    #        return (False, xsd_error_list(oError, xmlstr))
 
-        # Return this string
-        return (True, xmlstr)
+    #    # Return this string
+    #    return (True, xmlstr)
 
     def download_to_xml(self, context):
         """Make the XML representation of this descriptor downloadable"""
@@ -766,7 +766,7 @@ class DescriptorDetailView(DetailView):
         sFileName = 'oh-descriptor-{}'.format(getattr(itemThis, 'identifier'))
         # Get the XML of this collection
         # OLD: (bValid, sXmlStr) = self.convert_to_xml(context)
-        (bValid, sXmlStr) = create_descriptor_xml(context['descriptor'], self.request)
+        (bValid, sXmlStr) = create_descriptor_xml(itemThis, self.request)
         if bValid:
             # Create the HttpResponse object with the appropriate CSV header.
             response = HttpResponse(sXmlStr, content_type='text/xml')

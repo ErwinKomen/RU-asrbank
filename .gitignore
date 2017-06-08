@@ -246,3 +246,4 @@ ModelManifest.xml
 
 # Python
 *.pyc
+/asrbank/asrbank/transcription/migrations
