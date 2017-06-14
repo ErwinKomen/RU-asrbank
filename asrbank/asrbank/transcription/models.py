@@ -16,6 +16,9 @@ import sys
 MAX_IDENTIFIER_LEN = 10
 MAX_STRING_LEN = 255
 
+INTERNAL_LANDINGPAGE = "internal.landingpage"
+INTERNAL_SEARCHPAGE = "internal.searchpage"
+
 DESCRIPTOR_ACCESS = "descriptor.access"
 DESCRIPTOR_OWNER = "descriptor.owner"
 DESCRIPTOR_IDENTIFIER = "descriptor.identifier"
@@ -420,20 +423,25 @@ class Topic(models.Model):
 class Descriptor(models.Model):
     """Description of the metadata of one OH transcription"""
 
-    # INTERNAL FIELD: identifier (1)
+    # ============ INTERNAL FIELDS ================================
+    # identifier (1)
     identifier = models.CharField("Unique short descriptor identifier (10 characters max)", 
                                   max_length=MAX_IDENTIFIER_LEN, default='-', help_text=get_help(DESCRIPTOR_IDENTIFIER))
 
-    # INTERNAL FIELD: Owner of this descriptor (1)
+    # Owner of this descriptor (1)
     owner = models.ForeignKey(User, blank=False, null=False, help_text=get_help(DESCRIPTOR_OWNER))
 
-    # INTERNAL FIELD: who has access to this particular record? (1)
+    # who has access to this particular record? (1)
     access = models.CharField("Access to this record", choices=build_choice_list(DESCRIPTOR_ACCESS), max_length=5, 
                             help_text=get_help(DESCRIPTOR_ACCESS), default='0')
 
-    # INTERNAL FIELD: the persistent identifier name by which this descriptor is going to be recognized
+    # the persistent identifier name by which this descriptor is going to be recognized
     pidname = models.CharField("Registry identifier", 
                                max_length=MAX_STRING_LEN, default="empty")
+    # Landing Page (1)
+    landingPage = models.URLField("URL of the landing page", help_text=get_help(INTERNAL_LANDINGPAGE), default='')
+    # Search Page (0-1)
+    searchPage = models.URLField("URL of the search page", help_text=get_help(INTERNAL_SEARCHPAGE), blank=True, null=True)
 
     # ------------ ADMINISTRATIVE --------------
     # [1] Project title
