@@ -16,7 +16,7 @@ from django.contrib import admin
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
+WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
 if "RU-asrbank\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
@@ -27,6 +27,9 @@ XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
 APP_PREFIX = "ru/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
+elif "/applejack" in WRITABLE_DIR:
+    APP_PREFIX = "asrbank/"
+    admin.site.site_url = "/asrbank"
 elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
     admin.site.site_url = "/oh-metadataregistry"
@@ -143,7 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-if ("/scratch" in WRITABLE_DIR):
+if ("/scratch" in WRITABLE_DIR or "/applejack" in WRITABLE_DIR):
     STATIC_URL = '/'+APP_PREFIX+'static/'
 
 STATIC_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))))
