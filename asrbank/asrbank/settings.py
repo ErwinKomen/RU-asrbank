@@ -27,12 +27,15 @@ XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
 APP_PREFIX = "ru/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
+    admin.site.site_url = '/'
 elif "/applejack" in WRITABLE_DIR:
     APP_PREFIX = "asrbank/"
     admin.site.site_url = "/asrbank"
 elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
     admin.site.site_url = "/oh-metadataregistry"
+
+FORCE_SCRIPT_NAME = admin.site.site_url
 
 # HOME_URI = 
 

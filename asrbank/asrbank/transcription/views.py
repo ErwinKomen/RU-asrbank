@@ -539,6 +539,7 @@ class DescriptorListView(ListView):
             qs = None
         context['overview_list'] = qs# qs.select_related()
         context['order_heads'] = self.order_heads
+        context['authenticated'] = self.request.user.is_authenticated()
         # Return the calculated context
         return context
 
