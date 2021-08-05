@@ -12,7 +12,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
 from django.core.files import File
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from wsgiref import util
 from wsgiref.util import FileWrapper
 from django.db.models.functions import Lower
