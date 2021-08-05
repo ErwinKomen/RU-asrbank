@@ -4,8 +4,9 @@ Definition of urls for asrbank.
 
 from datetime import datetime
 from django.conf.urls import url
-from django.core import urlresolvers
-#import django.contrib.auth.views
+#from django.core import urlresolvers
+import django.contrib.auth.views
+from django.contrib.auth.views import LoginView, LogoutView
 
 import asrbank.transcription.forms
 from asrbank.transcription.views import *

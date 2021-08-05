@@ -16,10 +16,12 @@ from django.contrib import admin
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
+WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
 if "RU-asrbank\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
+elif "/applejack" in BASE_DIR:
+    WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
 
 # Specify the directory where the created XML files are going to be stored (persistently)
 XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))

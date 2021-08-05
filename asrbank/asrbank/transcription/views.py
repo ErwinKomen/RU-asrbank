@@ -22,6 +22,7 @@ import json
 from datetime import datetime
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
+import lxml
 from lxml import etree
 import os
 import tarfile
@@ -525,7 +526,7 @@ class DescriptorListView(ListView):
             else:
                 # order = "-" + order
                 self.order_heads[iOrderCol-1]['order'] = 'o={}'.format(iOrderCol)
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             lstQ = []
             if not oUser.is_superuser:
                 lstQ.append(Q(owner=oUser))
@@ -539,7 +540,7 @@ class DescriptorListView(ListView):
             qs = None
         context['overview_list'] = qs# qs.select_related()
         context['order_heads'] = self.order_heads
-        context['authenticated'] = self.request.user.is_authenticated()
+        context['authenticated'] = self.request.user.is_authenticated
         # Return the calculated context
         return context
 
@@ -652,7 +653,7 @@ class DescriptorListView(ListView):
         # Possibly adapt the query to focus on tye current user
         if not oUser.is_superuser:
             lstQ.append(Q(owner=oUser))
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             qs = Descriptor.objects.filter(*lstQ).select_related()
         else:
             qs = None

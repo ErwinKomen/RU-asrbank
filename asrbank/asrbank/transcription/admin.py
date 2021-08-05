@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.db.models import Q
 from django.forms import Textarea
 from django.http import HttpResponseRedirect
