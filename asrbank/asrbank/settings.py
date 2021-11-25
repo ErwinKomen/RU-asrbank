@@ -59,6 +59,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', 'applejack.science.ru.nl']
 
+APPEND_SLASH = True
+
 
 # Application definition
 
