@@ -41,6 +41,8 @@ elif "/scratch" in WRITABLE_DIR:
     ADMIN_SITE_URL = "/oh-metadataregistry"
 
 # FORCE_SCRIPT_NAME = admin.site.site_url
+# WOrks for Django 2.2 onwards:
+FORCE_SCRIPT_NAME = ADMIN_SITE_URL
 
 # HOME_URI = 
 
