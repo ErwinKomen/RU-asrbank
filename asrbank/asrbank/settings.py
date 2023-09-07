@@ -16,10 +16,12 @@ from django.contrib import admin
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
+WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
 if "RU-asrbank\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
+elif "/applejack" in BASE_DIR:
+    WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
 
 # Specify the directory where the created XML files are going to be stored (persistently)
 XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
@@ -27,12 +29,20 @@ XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
 APP_PREFIX = "ru/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
+    # admin.site.site_url = '/'
+    ADMIN_SITE_URL = "/"
 elif "/applejack" in WRITABLE_DIR:
     APP_PREFIX = "asrbank/"
-    admin.site.site_url = "/asrbank"
+    # admin.site.site_url = "/asrbank"
+    ADMIN_SITE_URL = "/asrbank"
 elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
-    admin.site.site_url = "/oh-metadataregistry"
+    # admin.site.site_url = "/oh-metadataregistry"
+    ADMIN_SITE_URL = "/oh-metadataregistry"
+
+# FORCE_SCRIPT_NAME = admin.site.site_url
+# WOrks for Django 2.2 onwards:
+FORCE_SCRIPT_NAME = ADMIN_SITE_URL
 
 # HOME_URI = 
 
@@ -51,6 +61,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', 'applejack.science.ru.nl']
 
+APPEND_SLASH = True
+
 
 # Application definition
 
@@ -66,13 +78,13 @@ INSTALLED_APPS = [
     'asrbank.transcription',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

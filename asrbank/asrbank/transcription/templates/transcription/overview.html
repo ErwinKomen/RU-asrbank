@@ -1,4 +1,4 @@
-﻿{% extends "transcription/layout.html" %}
+{% extends "transcription/layout.html" %}
 
 {% block content %}
       {% if publish %}
@@ -8,11 +8,13 @@
         </div>
       {% endif %}
       <h3>Available metadata records</h3>
-      <div id="content-main">
-        <ul class="object-tools">
-          <li><a class="addlink" href="{% url 'add' %}">Add a metadata record</a></li>
-        </ul>
-      </div>
+      {% if authenticated %}
+        <div id="content-main">
+          <ul class="object-tools">
+            <li><a class="addlink" href="{% url 'add' %}">Add a metadata record</a></li>
+          </ul>
+        </div>
+      {% endif %}
     {% if overview_list %}
       <table class="table table-hover">
         <thead>

@@ -18,7 +18,7 @@ textarea {
 }*/
 
 div.breadcrumbs {
-  margin-top: -20px;
+  margin-top: 0px;  /* -20px; */
 }
 
 /* styles for validation helpers */
@@ -262,3 +262,22 @@ div.inline-group a.add-related {
 .object-tools a.addlink {
     background-image: url(../img/tooltag-add.svg);
 }
+
+
+body > div > footer {
+  height: 18px;
+  padding-top: 4px;
+  background: darkblue;
+  color: white;
+  font-size: x-small;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  text-align: center;
+}
+body > div > footer a {
+  color: #355e3b;
+  position: relative;
+  z-index: 1000;
+}
+

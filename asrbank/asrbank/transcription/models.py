@@ -222,7 +222,7 @@ class Language(models.Model):
     name = models.CharField("Language used in interview", choices=build_choice_list(INTERVIEW_LANGUAGE), max_length=5, 
                             help_text=get_help(INTERVIEW_LANGUAGE), default='0')
     # [1]     Each descriptor can have [0-n] languages associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="languages")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="languages")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -237,7 +237,7 @@ class FileFormat(models.Model):
     name = models.CharField("Format of audio/video file", choices=build_choice_list(AUDIOVIDEO_FORMAT), max_length=5, 
                             help_text=get_help(AUDIOVIDEO_FORMAT), default='0')
     # [1]     Each descriptor can have [0-n] file formats associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="fileformats")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="fileformats")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -253,7 +253,7 @@ class Availability(models.Model):
 
     name = models.CharField("Availability", choices=build_choice_list(AVAILABILITY), max_length=5, help_text=get_help(AVAILABILITY), default='0')
     # [1]     Each descriptor can have [0-n] availability descriptors associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="availabilities")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="availabilities")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -284,7 +284,7 @@ class Interviewee(Participant):
         verbose_name_plural = "Persons that were interviewed"
 
     # [1]     Each descriptor can have [0-n] interviewees associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="interviewees")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="interviewees")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -298,7 +298,7 @@ class Interviewer(Participant):
         verbose_name_plural = "Interviewers"
 
     # [1]     Each descriptor can have [0-n] interviewers associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="interviewers")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="interviewers")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -319,7 +319,7 @@ class TemporalCoverage(models.Model):
     endYear = models.CharField("Last year covered by the interview", max_length=20,
                                help_text="Please use the following format: <em>YYYY</em>.")
     # [1]     Each descriptor can have [0-n] spatial coverages associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="temporalcoverages")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="temporalcoverages")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -340,7 +340,7 @@ class SpatialCoverage(models.Model):
     # [0-1] place
     place = models.CharField("Place (city) for this spatial coverage", max_length=80, help_text=get_help(COVERAGE_SPATIAL_PLACE), blank=True)
     # [1]     Each descriptor can have [0-n] spatial coverages associated with it
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="spatialcoverages")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="spatialcoverages")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -355,7 +355,7 @@ class Genre(models.Model):
     name = models.CharField("Genre", choices=build_choice_list(INTERVIEW_GENRE), 
                             max_length=5, help_text=get_help(INTERVIEW_GENRE), default='0')
     # [1]     Each descriptor can have [1-n] genres
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="genres")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="genres")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -375,7 +375,7 @@ class Annotation(models.Model):
     format = models.CharField("Annotation format", choices=build_choice_list(ANNOTATION_FORMAT, maybe_empty=True), max_length=5, 
                               help_text=get_help(ANNOTATION_FORMAT), blank = True)
     # [1]     Each descriptor can have [0-n] annotations
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="annotations")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="annotations")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -397,7 +397,7 @@ class Anonymisation(models.Model):
     name = models.CharField("Anonymisation level", choices=build_choice_list(ANONYMISATION), max_length=5, 
                             help_text=get_help(ANONYMISATION), default='0')
     # [1]     Each descriptor can have [0-n] anonymisation levels
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="anonymisations")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="anonymisations")
 
     def __str__(self):
         idt = self.descriptor.identifier
@@ -413,7 +413,7 @@ class Topic(models.Model):
     # [1]
     name = models.CharField("Topic",  max_length=MAX_STRING_LEN, help_text=get_help(TOPICLIST))
     # [1] Each descriptor can have [0-n] topics
-    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, related_name="topics")
+    descriptor = models.ForeignKey("Descriptor", blank=False, null=False, default=1, on_delete=models.CASCADE, related_name="topics")
 
     def __str__(self):
         return self.name
@@ -429,7 +429,7 @@ class Descriptor(models.Model):
                                   max_length=MAX_IDENTIFIER_LEN, default='-', help_text=get_help(DESCRIPTOR_IDENTIFIER))
 
     # Owner of this descriptor (1)
-    owner = models.ForeignKey(User, blank=False, null=False, help_text=get_help(DESCRIPTOR_OWNER))
+    owner = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE, help_text=get_help(DESCRIPTOR_OWNER))
 
     # who has access to this particular record? (1)
     access = models.CharField("Access to this record", choices=build_choice_list(DESCRIPTOR_ACCESS), max_length=5, 

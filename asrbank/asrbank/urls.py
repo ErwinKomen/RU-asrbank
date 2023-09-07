@@ -4,8 +4,9 @@ Definition of urls for asrbank.
 
 from datetime import datetime
 from django.conf.urls import url
-from django.core import urlresolvers
+#from django.core import urlresolvers
 import django.contrib.auth.views
+from django.contrib.auth.views import LoginView, LogoutView
 
 import asrbank.transcription.forms
 from asrbank.transcription.views import *
@@ -15,7 +16,7 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.shortcuts import redirect
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic.base import RedirectView
 from django.contrib import admin
 import nested_admin
@@ -46,29 +47,19 @@ urlpatterns = [
     url(r'^registry/(?P<slug>[-\w]+)$', DescriptorDetailView.as_view(), {'type': 'registry'}, name='registry'),
     url(r'^signup/$', asrbank.transcription.views.signup, name='signup'),
 
-    url(r'^login/$',
-        django.contrib.auth.views.login,
-        {
-            'template_name': 'transcription/login.html',
-            'authentication_form': asrbank.transcription.forms.BootstrapAuthenticationForm,
-            'extra_context':
-            {
-                'title': 'Log in',
-                'year': datetime.now().year,
-            }
-        },
+    url(r'^login/$', LoginView.as_view
+        (
+            template_name= 'transcription/login.html',
+            authentication_form= asrbank.transcription.forms.BootstrapAuthenticationForm,
+            extra_context= {'title': 'Log in','year': datetime.now().year,}
+        ),
         name='login'),
-    url(r'^logout$',
-        django.contrib.auth.views.logout,
-        {
-            'next_page': reverse_lazy('home'),
-        },
-        name='logout'),
+    url(r'^logout$',  LogoutView.as_view(next_page=reverse_lazy('home')), name='logout'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls, name='admin_base'),
     url(r'^_nested_admin/', include('nested_admin.urls')),
 ]
