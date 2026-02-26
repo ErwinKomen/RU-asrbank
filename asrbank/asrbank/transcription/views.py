@@ -33,6 +33,7 @@ import io
 from asrbank.settings import APP_PREFIX, LANGUAGE_CODE_LIST, WRITABLE_DIR,XSD_NAME, COUNTRY_CODES, TAR_DIR, XML_DIR
 from asrbank.transcription.models import *
 from asrbank.transcription.forms import *
+from asrbank.utils import ErrHandle
 
 # Local variables
 XSI_CMD = "http://www.clarin.eu/cmd/"
@@ -307,17 +308,32 @@ def validateXml(xmlstr):
     The XSD schema that is being used must be present in the static files section.
     """
 
-    # Get the XSD definition
-    schema = getSchema()
-    if schema == None: return False
+    bResult = False
+    err_log = None
+    oErr = ErrHandle()
+    try:
 
-    # Load the XML string into a document
-    xml = etree.XML(xmlstr)
+        # Get the XSD definition
+        schema = getSchema()
+        if schema is None: 
+            #return False
+            bResult = False
+            err_log = None
+        else:
+            # Load the XML string into a document
+            xml = etree.XML(xmlstr)
 
-    # Perform the validation
-    validation = schema.validate(xml)
-    # Return a tuple with the boolean validation and a possible error log
-    return (validation, schema.error_log, )
+            # Perform the validation
+            validation = schema.validate(xml)
+            # Return a tuple with the boolean validation and a possible error log
+            # return (validation, schema.error_log, )
+            bResult = validation
+            err_log = schema.error_log
+    except:
+        msg = oErr.get_error_message()
+        oErr.DoError("validateXml")
+
+    return (bResult, err_log,)
 
 def getSchema():
     # Get the XSD file into an LXML structure
