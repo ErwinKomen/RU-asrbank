@@ -9,7 +9,7 @@
 
 django==4.1
 django-nested-admin
-lxml
+lxml<5
 openpyxl
 urllib3
 
