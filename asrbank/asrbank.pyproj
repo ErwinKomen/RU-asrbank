@@ -4,7 +4,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <Name>asrbank</Name>
     <RootNamespace>asrbank</RootNamespace>
-    <InterpreterId>MSBuild|asrbank39|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|asrbank310|$(MSBuildProjectFullPath)</InterpreterId>
     <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
   </PropertyGroup>
   <PropertyGroup>
@@ -56,6 +56,8 @@
     <Folder Include="asrbank\transcription\" />
     <Folder Include="asrbank\transcription\migrations\" />
     <Folder Include="asrbank\transcription\static\" />
+    <Folder Include="asrbank\transcription\static\admin\" />
+    <Folder Include="asrbank\transcription\static\admin\css\" />
     <Folder Include="asrbank\transcription\static\transcription\" />
     <Folder Include="asrbank\transcription\static\transcription\content\" />
     <Folder Include="asrbank\transcription\static\transcription\fonts\" />
@@ -69,6 +71,17 @@
     <Content Include="asrbank\templates\admin\edit_inline\tabular.html" />
     <Content Include="asrbank\templates\admin\includes\fieldset.html" />
     <Content Include="asrbank\templates\admin\transcription\descriptor\change_form.html" />
+    <Content Include="asrbank\transcription\static\admin\css\autocomplete.css" />
+    <Content Include="asrbank\transcription\static\admin\css\base.css" />
+    <Content Include="asrbank\transcription\static\admin\css\changelists.css" />
+    <Content Include="asrbank\transcription\static\admin\css\dashboard.css" />
+    <Content Include="asrbank\transcription\static\admin\css\fonts.css" />
+    <Content Include="asrbank\transcription\static\admin\css\forms.css" />
+    <Content Include="asrbank\transcription\static\admin\css\login.css" />
+    <Content Include="asrbank\transcription\static\admin\css\responsive.css" />
+    <Content Include="asrbank\transcription\static\admin\css\responsive_rtl.css" />
+    <Content Include="asrbank\transcription\static\admin\css\rtl.css" />
+    <Content Include="asrbank\transcription\static\admin\css\widgets.css" />
     <Content Include="asrbank\transcription\static\transcription\scripts\asrbank.js" />
     <Content Include="asrbank\transcription\templates\transcription\more.html" />
     <Content Include="asrbank\transcription\templates\transcription\overview.html" />
@@ -110,6 +123,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Interpreter Include="..\..\..\..\..\env\asrbank310\">
+      <Id>asrbank310</Id>
+      <Version>3.10</Version>
+      <Description>asrbank310 (Python 3.10 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
     <Interpreter Include="..\..\..\..\..\env\asrbank39\">
       <Id>asrbank39</Id>
       <Version>3.9</Version>
