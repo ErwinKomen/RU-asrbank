@@ -23,10 +23,15 @@ if "RU-asrbank\\writable" in WRITABLE_DIR:
 elif "/applejack" in BASE_DIR:
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/asrbank/database/"))
 
+# Containerized Radboud Environment
+if "/var/writable" in WRITABLE_DIR:
+    WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../writable/database/"))
+
 # Specify the directory where the created XML files are going to be stored (persistently)
 XML_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "xml"))
 
 APP_PREFIX = "ru/"
+ADMIN_SITE_URL = "/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
     # admin.site.site_url = '/'
@@ -39,6 +44,9 @@ elif "/scratch" in WRITABLE_DIR:
     APP_PREFIX = "oh-metadataregistry/"
     # admin.site.site_url = "/oh-metadataregistry"
     ADMIN_SITE_URL = "/oh-metadataregistry"
+else:    # Container environment
+    APP_PREFIX = ""
+    ADMIN_SITE_URL = "/"
 
 # FORCE_SCRIPT_NAME = admin.site.site_url
 # WOrks for Django 2.2 onwards:
@@ -47,8 +55,6 @@ FORCE_SCRIPT_NAME = ADMIN_SITE_URL
 # HOME_URI = 
 
 XSD_NAME = "OralHistoryInterview.xsd.txt"
-TAR_DIR = os.path.abspath(os.path.join(WRITABLE_DIR, "asrbank/xml"))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -67,6 +73,7 @@ APPEND_SLASH = True
 # Application definition
 
 INSTALLED_APPS = [
+    'asrbank.transcription',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.auth',
@@ -75,7 +82,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'nested_admin',
-    'asrbank.transcription',
 ]
 
 MIDDLEWARE = [
